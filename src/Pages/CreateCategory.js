@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // ✅ Import navigate
 import axios from 'axios';
-import { FaUpload } from 'react-icons/fa'; // Import the React icon for upload
+import { FaUpload } from 'react-icons/fa';
 
 const CreateCategory = () => {
+  const navigate = useNavigate(); // ✅ Initialize navigate
+
   const [categoryName, setCategoryName] = useState('');
-  const [subCategory, setSubCategory] = useState(''); // For subcategory input
+  const [subCategory, setSubCategory] = useState('');
   const [image, setImage] = useState(null);
   const [previewImage, setPreviewImage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -20,32 +24,32 @@ const CreateCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setErrorMessage('');
+    setSuccessMessage('');
+
     if (!categoryName || !image) {
-      setErrorMessage('Category name and image are required');
+      setErrorMessage('Category name and image are required.');
       return;
     }
 
     const formData = new FormData();
     formData.append('categoryName', categoryName);
     formData.append('image', image);
-
     if (subCategory.trim()) {
-      formData.append('subCategory', subCategory); // Only add subcategory if entered
+      formData.append('subCategoryName', subCategory);
     }
 
     try {
-      const res = await axios.post('https://posterbnaobackend.onrender.com/api/category/create-cateogry', formData, {
+      await axios.post('https://posterbnaobackend.onrender.com/api/category/create-cateogry', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      alert('Category created successfully!');
-      setCategoryName('');
-      setSubCategory(''); // Reset subcategory input
-      setImage(null);
-      setPreviewImage('');
-      setErrorMessage('');
+      setSuccessMessage('Category created successfully!');
+      setTimeout(() => {
+        navigate('/categorylist'); // ✅ Navigate after success
+      }, 1000);
     } catch (err) {
       console.error('Error creating category:', err);
       setErrorMessage('Error creating category. Please try again.');
@@ -53,8 +57,9 @@ const CreateCategory = () => {
   };
 
   return (
-    <div className="container p-6 max-w-xl mx-auto bg-white shadow-lg rounded-lg">
+    <div className="container p-6 max-w-xl mx-auto bg-white shadow-lg rounded-lg mt-6">
       <h2 className="text-xl font-semibold mb-6 text-center text-blue-900">Create New Category</h2>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-lg font-medium mb-2">Category Name</label>
@@ -74,13 +79,12 @@ const CreateCategory = () => {
             className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={subCategory}
             onChange={(e) => setSubCategory(e.target.value)}
-            placeholder="Enter subcategory name (Optional)"
+            placeholder="Enter subcategory name (optional)"
           />
         </div>
 
         <div>
           <label className="block text-lg font-medium mb-2">Category Image</label>
-          {/* Hidden file input */}
           <input
             type="file"
             accept="image/*"
@@ -88,8 +92,11 @@ const CreateCategory = () => {
             className="hidden"
             id="fileInput"
           />
-          {/* Custom upload button using React icon */}
-          <label htmlFor="fileInput" className="cursor-pointer p-2 text-sm bg-blue-900 text-white rounded-md flex items-center justify-start">
+
+          <label
+            htmlFor="fileInput"
+            className="cursor-pointer p-2 text-sm bg-blue-900 text-white rounded-md flex items-center justify-start"
+          >
             <FaUpload className="mr-2 text-sm" /> Upload Image
           </label>
 
@@ -104,7 +111,13 @@ const CreateCategory = () => {
           )}
         </div>
 
-        {errorMessage && <p className="text-red-600 text-center">{errorMessage}</p>}
+        {errorMessage && (
+          <p className="text-red-600 text-center">{errorMessage}</p>
+        )}
+
+        {successMessage && (
+          <p className="text-green-600 text-center">{successMessage}</p>
+        )}
 
         <div className="text-center">
           <button

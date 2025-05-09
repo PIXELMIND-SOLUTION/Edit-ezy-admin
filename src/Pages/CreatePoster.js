@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+
 
 const CreatePoster = () => {
   const [name, setName] = useState('');
   const [categoryName, setCategoryName] = useState('');
   const [price, setPrice] = useState('');
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState([]); // For image previews
   const [imageFiles, setImageFiles] = useState([]); // For form submission
   const [description, setDescription] = useState('');
   const [festivalDate, setFestivalDate] = useState('');
@@ -13,6 +15,8 @@ const CreatePoster = () => {
   const [inStock, setInStock] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [categories, setCategories] = useState([]);
+    const navigate = useNavigate(); // Initialize useNavigate
+
 
   // Fetch categories
   useEffect(() => {
@@ -31,14 +35,15 @@ const CreatePoster = () => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const previews = files.map((file) => URL.createObjectURL(file));
-    setImages(previews);
-    setImageFiles(files); // Save actual files for upload
+    setImages(previews); // For previewing images
+    setImageFiles(files); // For actual files to be uploaded
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !categoryName || !price || !imageFiles.length || !description || !size) {
+    // Validation check
+    if (!name || !categoryName || !price || (!imageFiles.length && !festivalDate) || !description || !size) {
       setErrorMessage('Please fill all required fields.');
       return;
     }
@@ -54,6 +59,7 @@ const CreatePoster = () => {
       formData.append('festivalDate', festivalDate);
     }
 
+    // Append images (both single and multiple)
     imageFiles.forEach((file) => formData.append('images', file));
 
     try {
@@ -68,7 +74,9 @@ const CreatePoster = () => {
       );
 
       alert('Poster created successfully!');
-      // Reset form
+            navigate('/posterlist');  // This navigates to /posterlist page
+
+      // Reset form after successful submission
       setName('');
       setCategoryName('');
       setPrice('');
@@ -90,6 +98,7 @@ const CreatePoster = () => {
       <h2 className="text-xl font-semibold mb-6 text-center text-blue-900">Create New Poster</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Poster Name */}
           <div>
             <label className="block text-lg font-medium mb-2">Poster Name</label>
             <input
@@ -101,6 +110,7 @@ const CreatePoster = () => {
             />
           </div>
 
+          {/* Category Name */}
           <div>
             <label className="block text-lg font-medium mb-2">Category Name</label>
             <select
@@ -117,6 +127,7 @@ const CreatePoster = () => {
             </select>
           </div>
 
+          {/* Price */}
           <div>
             <label className="block text-lg font-medium mb-2">Price</label>
             <input
@@ -128,6 +139,7 @@ const CreatePoster = () => {
             />
           </div>
 
+          {/* Images Upload */}
           <div className="col-span-1">
             <label className="block text-lg font-medium mb-2">Images</label>
             <input
@@ -151,6 +163,7 @@ const CreatePoster = () => {
             )}
           </div>
 
+          {/* Description */}
           <div className="col-span-1">
             <label className="block text-lg font-medium mb-2">Description</label>
             <textarea
@@ -162,6 +175,7 @@ const CreatePoster = () => {
             />
           </div>
 
+          {/* Festival Date */}
           <div className="col-span-1">
             <label className="block text-lg font-medium mb-2">
               Festival Date <span className="text-gray-500">(Optional)</span>
@@ -174,6 +188,7 @@ const CreatePoster = () => {
             />
           </div>
 
+          {/* Size */}
           <div className="col-span-1">
             <label className="block text-lg font-medium mb-2">Size</label>
             <input
@@ -185,6 +200,7 @@ const CreatePoster = () => {
             />
           </div>
 
+          {/* In Stock */}
           <div className="col-span-1 flex items-center gap-3 mt-8">
             <input
               type="checkbox"
@@ -196,6 +212,7 @@ const CreatePoster = () => {
           </div>
         </div>
 
+        {/* Error Message */}
         {errorMessage && <p className="text-red-600 text-center">{errorMessage}</p>}
 
         <div className="text-center">

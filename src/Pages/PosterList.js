@@ -53,8 +53,9 @@ export default function PosterList() {
     writeFile(wb, `posters.${type}`);
   };
 
+  // Fix to handle undefined poster name
   const filteredPosters = posters.filter((poster) => {
-    return poster.name.toLowerCase().includes(search.toLowerCase());
+    return (poster.name || "").toLowerCase().includes(search.toLowerCase());
   });
 
   const indexOfLastPoster = currentPage * postersPerPage;
@@ -149,18 +150,18 @@ export default function PosterList() {
               <tr key={poster._id} className="border-b">
                 <td className="p-2 border">{index + 1 + indexOfFirstPoster}</td>
                 <td className="p-2 border">
-                  <div className="flex gap-2">
-                    {poster.images.slice(0, 3).map((image, idx) => (
-                      <img
-                        key={idx}
-                        src={image}
-                        alt={`poster-image-${idx}`}
-                        className="w-12 h-12 object-cover rounded"
-                        onError={(e) => (e.target.src = "/default-image.jpg")}
-                      />
-                    ))}
-                  </div>
-                </td>
+  <div className="flex gap-2">
+    {poster.images.slice(0, 3).map((image, idx) => (
+      <img
+        key={idx}
+        src={`https://posterbnaobackend.onrender.com/uploads/${image}`}  // Prepend the server URL to the image path
+        alt={`poster-image-${idx}`}
+        className="w-12 h-12 object-cover rounded"
+        onError={(e) => (e.target.src = "/default-image.jpg")} // Fallback image if error occurs
+      />
+    ))}
+  </div>
+</td>
                 <td className="p-2 border">{poster.name || "N/A"}</td>
                 <td className="p-2 border">{poster.categoryName || "N/A"}</td>
                 <td className="p-2 border">{poster.price || "N/A"}</td>
@@ -295,27 +296,37 @@ export default function PosterList() {
                   className="w-full p-2 border rounded mb-4"
                 />
               </div>
+
+              <div>
+                <label className="block mb-2">In Stock</label>
+                <input
+                  type="checkbox"
+                  checked={editedPosterData.inStock}
+                  onChange={(e) =>
+                    setEditedPosterData({ ...editedPosterData, inStock: e.target.checked })
+                  }
+                  className="w-full p-2 border rounded mb-4"
+                />
+              </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex justify-between mt-4">
+            <div className="mt-4 flex justify-end">
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded"
-                onClick={() => setModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="bg-blue-500 text-white px-4 py-2 rounded"
                 onClick={handleSaveChanges}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
               >
                 Save Changes
+              </button>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="bg-gray-300 text-black px-4 py-2 rounded ml-2"
+              >
+                Cancel
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

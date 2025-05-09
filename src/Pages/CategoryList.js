@@ -7,10 +7,11 @@ export default function CategoryList() {
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false); // State to manage modal visibility
-  const [selectedCategory, setSelectedCategory] = useState(null); // State to hold the selected category
-  const [categoryName, setCategoryName] = useState(""); // For input fields
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [categoryName, setCategoryName] = useState("");
   const [categoryImage, setCategoryImage] = useState("");
+  const [subCategoryName, setSubCategoryName] = useState("");
   const categoriesPerPage = 5;
 
   useEffect(() => {
@@ -27,10 +28,11 @@ export default function CategoryList() {
   }, []);
 
   const exportData = (type) => {
-    const exportItems = filteredCategories.map(({ _id, categoryName, image }) => ({
-      id: _id,
-      categoryName: categoryName || "N/A",
-      image: image || "N/A",
+    const exportItems = filteredCategories.map(({ _id, categoryName, subCategoryName, image }) => ({
+      ID: _id,
+      Category: categoryName || "N/A",
+      Subcategory: subCategoryName || "N/A",
+      Image: image || "N/A",
     }));
     const ws = utils.json_to_sheet(exportItems);
     const wb = utils.book_new();
@@ -39,7 +41,7 @@ export default function CategoryList() {
   };
 
   const filteredCategories = categories.filter((cat) =>
-    cat.categoryName.toLowerCase().includes(search.toLowerCase())
+    (cat.categoryName || "").toLowerCase().includes(search.toLowerCase())
   );
 
   const indexOfLast = currentPage * categoriesPerPage;
@@ -50,6 +52,7 @@ export default function CategoryList() {
   const handleEdit = (category) => {
     setSelectedCategory(category);
     setCategoryName(category.categoryName || "");
+    setSubCategoryName(category.subCategoryName || "");
     setCategoryImage(category.image || "");
     setModalOpen(true);
   };
@@ -58,21 +61,38 @@ export default function CategoryList() {
     const updatedCategory = {
       ...selectedCategory,
       categoryName,
+      subCategoryName,
       image: categoryImage,
     };
 
     axios
-      .put(`https://posterbnaobackend.onrender.com/api/category/update-category/${selectedCategory._id}`, updatedCategory)
-      .then((res) => {
+      .put(`https://posterbnaobackend.onrender.com/api/category/update/${selectedCategory._id}`, updatedCategory)
+      .then(() => {
         setCategories(categories.map((cat) => (cat._id === selectedCategory._id ? updatedCategory : cat)));
         setModalOpen(false);
-        setSelectedCategory(null);
-        setCategoryName("");
-        setCategoryImage("");
+        resetModalState();
       })
       .catch((error) => {
         console.error("Error updating category:", error);
       });
+  };
+
+  const handleDelete = (id) => {
+    axios
+      .delete(`https://posterbnaobackend.onrender.com/api/category/delete/${id}`)
+      .then(() => {
+        setCategories(categories.filter((cat) => cat._id !== id));
+      })
+      .catch((error) => {
+        console.error("Error deleting category:", error);
+      });
+  };
+
+  const resetModalState = () => {
+    setCategoryName("");
+    setCategoryImage("");
+    setSubCategoryName("");
+    setSelectedCategory(null);
   };
 
   return (
@@ -104,7 +124,8 @@ export default function CategoryList() {
             <tr className="bg-purple-600 text-white">
               <th className="p-2 border">Sl</th>
               <th className="p-2 border">Image</th>
-              <th className="p-2 border">Category Name</th>
+              <th className="p-2 border">Category</th>
+              <th className="p-2 border">Subcategory</th>
               <th className="p-2 border">Created At</th>
               <th className="p-2 border">Action</th>
             </tr>
@@ -115,13 +136,14 @@ export default function CategoryList() {
                 <td className="p-2 border">{index + 1 + indexOfFirst}</td>
                 <td className="p-2 border">
                   <img
-                    src={cat.image}
+                    src={`https://posterbnaobackend.onrender.com/uploads/${cat.image}`}
                     alt={cat.categoryName}
                     className="w-12 h-12 rounded object-cover"
                     onError={(e) => (e.target.src = "/default-category.jpg")}
                   />
                 </td>
                 <td className="p-2 border">{cat.categoryName || "N/A"}</td>
+                <td className="p-2 border">{cat.subCategoryName || "—"}</td>
                 <td className="p-2 border">
                   {new Date(cat.createdAt).toLocaleDateString()}
                 </td>
@@ -132,7 +154,10 @@ export default function CategoryList() {
                   >
                     <FaEdit />
                   </button>
-                  <button className="bg-red-500 text-white p-1 rounded">
+                  <button
+                    onClick={() => handleDelete(cat._id)}
+                    className="bg-red-500 text-white p-1 rounded"
+                  >
                     <FaTrash />
                   </button>
                 </td>
@@ -169,7 +194,7 @@ export default function CategoryList() {
         </button>
       </div>
 
-      {/* Edit Category Modal */}
+      {/* Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
@@ -180,6 +205,15 @@ export default function CategoryList() {
                 type="text"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
+                className="w-full p-2 border rounded mb-4"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">Subcategory Name</label>
+              <input
+                type="text"
+                value={subCategoryName}
+                onChange={(e) => setSubCategoryName(e.target.value)}
                 className="w-full p-2 border rounded mb-4"
               />
             </div>
