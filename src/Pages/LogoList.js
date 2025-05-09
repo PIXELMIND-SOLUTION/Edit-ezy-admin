@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import axios from "axios";
 
 const LogoList = () => {
-  // Dummy data for logos
+  // State for logos, modal, and editing logo data
   const [logos, setLogos] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editedLogoData, setEditedLogoData] = useState({});
   const logosPerPage = 5;
 
   useEffect(() => {
-    // Fetch logos data (this would be replaced with your actual API)
+    // Dummy data for logos (replace with your actual API)
     setLogos([
       {
         id: 1,
@@ -30,7 +31,6 @@ const LogoList = () => {
         description: "A logo for a travel agency.",
         logoImage: "https://mir-s3-cdn-cf.behance.net/projects/original/ec753e129429523.61a1e79332f16.png",
       },
-      // Add more logos if needed
     ]);
   }, []);
 
@@ -43,14 +43,23 @@ const LogoList = () => {
   const currentLogos = filteredLogos.slice(indexOfFirstLogo, indexOfLastLogo);
   const totalPages = Math.ceil(filteredLogos.length / logosPerPage);
 
-  const handleEdit = (id) => {
-    console.log("Editing logo with ID:", id);
-    // Implement edit functionality here
+  const handleEdit = (logo) => {
+    setEditedLogoData(logo); // Populate the modal with the current logo data
+    setModalOpen(true); // Open the modal
   };
 
   const handleDelete = (id) => {
     setLogos(logos.filter((logo) => logo.id !== id));
     alert("Logo deleted successfully!");
+  };
+
+  const handleSaveChanges = () => {
+    setLogos(
+      logos.map((logo) =>
+        logo.id === editedLogoData.id ? editedLogoData : logo
+      )
+    );
+    setModalOpen(false); // Close the modal
   };
 
   return (
@@ -92,7 +101,7 @@ const LogoList = () => {
                 <td className="p-2 border flex gap-2">
                   <button
                     className="bg-blue-500 text-white p-1 rounded"
-                    onClick={() => handleEdit(logo.id)}
+                    onClick={() => handleEdit(logo)}
                   >
                     <FaEdit />
                   </button>
@@ -121,9 +130,7 @@ const LogoList = () => {
           <button
             key={index}
             onClick={() => setCurrentPage(index + 1)}
-            className={`px-4 py-2 rounded ${
-              currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
+            className={`px-4 py-2 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
           >
             {index + 1}
           </button>
@@ -136,6 +143,66 @@ const LogoList = () => {
           Next
         </button>
       </div>
+
+      {/* Edit Logo Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-xl font-semibold mb-4">Edit Logo</h3>
+
+            <div className="mb-4">
+              <label className="block mb-2">Logo Name</label>
+              <input
+                type="text"
+                value={editedLogoData.logoName}
+                onChange={(e) =>
+                  setEditedLogoData({ ...editedLogoData, logoName: e.target.value })
+                }
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-2">Description</label>
+              <input
+                type="text"
+                value={editedLogoData.description}
+                onChange={(e) =>
+                  setEditedLogoData({ ...editedLogoData, description: e.target.value })
+                }
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-2">Logo Image URL</label>
+              <input
+                type="text"
+                value={editedLogoData.logoImage}
+                onChange={(e) =>
+                  setEditedLogoData({ ...editedLogoData, logoImage: e.target.value })
+                }
+                className="w-full p-2 border rounded"
+              />
+            </div>
+
+            <div className="flex justify-between">
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+                onClick={() => setModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={handleSaveChanges}
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

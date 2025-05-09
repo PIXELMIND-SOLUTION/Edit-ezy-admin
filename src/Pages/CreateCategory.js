@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { FaUpload } from 'react-icons/fa'; // Import the React icon for upload
 
 const CreateCategory = () => {
   const [categoryName, setCategoryName] = useState('');
+  const [subCategory, setSubCategory] = useState(''); // For subcategory input
   const [image, setImage] = useState(null);
   const [previewImage, setPreviewImage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -19,13 +21,17 @@ const CreateCategory = () => {
     e.preventDefault();
 
     if (!categoryName || !image) {
-      setErrorMessage('All fields are required');
+      setErrorMessage('Category name and image are required');
       return;
     }
 
     const formData = new FormData();
     formData.append('categoryName', categoryName);
     formData.append('image', image);
+
+    if (subCategory.trim()) {
+      formData.append('subCategory', subCategory); // Only add subcategory if entered
+    }
 
     try {
       const res = await axios.post('https://posterbnaobackend.onrender.com/api/category/create-cateogry', formData, {
@@ -36,6 +42,7 @@ const CreateCategory = () => {
 
       alert('Category created successfully!');
       setCategoryName('');
+      setSubCategory(''); // Reset subcategory input
       setImage(null);
       setPreviewImage('');
       setErrorMessage('');
@@ -61,13 +68,31 @@ const CreateCategory = () => {
         </div>
 
         <div>
+          <label className="block text-lg font-medium mb-2">Subcategory (Optional)</label>
+          <input
+            type="text"
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={subCategory}
+            onChange={(e) => setSubCategory(e.target.value)}
+            placeholder="Enter subcategory name (Optional)"
+          />
+        </div>
+
+        <div>
           <label className="block text-lg font-medium mb-2">Category Image</label>
+          {/* Hidden file input */}
           <input
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none"
+            className="hidden"
+            id="fileInput"
           />
+          {/* Custom upload button using React icon */}
+          <label htmlFor="fileInput" className="cursor-pointer p-2 text-sm bg-blue-900 text-white rounded-md flex items-center justify-start">
+            <FaUpload className="mr-2 text-sm" /> Upload Image
+          </label>
+
           {previewImage && (
             <div className="mt-3">
               <img

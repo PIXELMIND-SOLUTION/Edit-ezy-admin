@@ -3,7 +3,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import { utils, writeFile } from "xlsx";
 import axios from "axios";
 
-export default function PosterList() {
+export default function BusinessPosterList() {
   const [posters, setPosters] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -13,9 +13,9 @@ export default function PosterList() {
     name: "",
     categoryName: "",
     price: "",
+    offerPrice: "",
     description: "",
     size: "",
-    festivalDate: "",
     inStock: false,
   });
 
@@ -23,34 +23,34 @@ export default function PosterList() {
 
   useEffect(() => {
     axios
-      .get("https://posterbnaobackend.onrender.com/api/poster/getallposter")
+      .get("https://posterbnaobackend.onrender.com/api/business/businessposters")
       .then((res) => {
         if (res.data) {
           setPosters(res.data);
         }
       })
       .catch((error) => {
-        console.error("Error fetching posters:", error);
+        console.error("Error fetching business posters:", error);
       });
   }, []);
 
   const exportData = (type) => {
     const exportPosters = filteredPosters.map(
-      ({ _id, name, categoryName, price, description, size, festivalDate, inStock }) => ({
+      ({ _id, name, categoryName, price, offerPrice, description, size, inStock }) => ({
         id: _id,
         name: name || "N/A",
         categoryName: categoryName || "N/A",
         price: price || "N/A",
+        offerPrice: offerPrice || "N/A",
         description: description || "N/A",
         size: size || "N/A",
-        festivalDate: festivalDate || "N/A",
         inStock: inStock ? "In Stock" : "Out of Stock",
       })
     );
     const ws = utils.json_to_sheet(exportPosters);
     const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Posters");
-    writeFile(wb, `posters.${type}`);
+    utils.book_append_sheet(wb, ws, "Business Posters");
+    writeFile(wb, `business_posters.${type}`);
   };
 
   const filteredPosters = posters.filter((poster) => {
@@ -68,9 +68,9 @@ export default function PosterList() {
       name: poster.name,
       categoryName: poster.categoryName,
       price: poster.price,
+      offerPrice: poster.offerPrice,
       description: poster.description,
       size: poster.size,
-      festivalDate: poster.festivalDate,
       inStock: poster.inStock,
     });
     setModalOpen(true); // Open the modal
@@ -79,7 +79,7 @@ export default function PosterList() {
   const handleSaveChanges = () => {
     axios
       .put(
-        `https://posterbnaobackend.onrender.com/api/poster/update/${selectedPoster._id}`,
+        `http://localhost:4000/api/business/update/${selectedPoster._id}`,
         editedPosterData
       )
       .then((res) => {
@@ -89,26 +89,26 @@ export default function PosterList() {
         setSelectedPoster(null);
       })
       .catch((error) => {
-        console.error("Error updating poster:", error);
+        console.error("Error updating business poster:", error);
       });
   };
 
   const handleDelete = (id) => {
     axios
-      .delete(`https://posterbnaobackend.onrender.com/api/poster/delete/${id}`)
+      .delete(`http://localhost:4000/api/business/delete/${id}`)
       .then((res) => {
         alert("Poster deleted successfully!");
         setPosters(posters.filter((poster) => poster._id !== id));
       })
       .catch((error) => {
-        console.error("Error deleting poster:", error);
+        console.error("Error deleting business poster:", error);
       });
   };
 
   return (
     <div className="p-4 border rounded-lg shadow-lg bg-white">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-blue-900">All Posters</h2>
+        <h2 className="text-xl font-semibold text-blue-900">Business Posters</h2>
       </div>
 
       <div className="flex justify-between mb-4">
@@ -137,9 +137,9 @@ export default function PosterList() {
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Category</th>
               <th className="p-2 border">Price</th>
+              <th className="p-2 border">Offer Price</th>
               <th className="p-2 border">Description</th>
               <th className="p-2 border">Size</th>
-              <th className="p-2 border">Festival Date</th>
               <th className="p-2 border">In Stock</th>
               <th className="p-2 border">Action</th>
             </tr>
@@ -164,9 +164,9 @@ export default function PosterList() {
                 <td className="p-2 border">{poster.name || "N/A"}</td>
                 <td className="p-2 border">{poster.categoryName || "N/A"}</td>
                 <td className="p-2 border">{poster.price || "N/A"}</td>
+                <td className="p-2 border">{poster.offerPrice || "N/A"}</td>
                 <td className="p-2 border">{poster.description || "N/A"}</td>
                 <td className="p-2 border">{poster.size || "N/A"}</td>
-                <td className="p-2 border">{new Date(poster.festivalDate).toLocaleDateString()}</td>
                 <td className="p-2 border">{poster.inStock ? "In Stock" : "Out of Stock"}</td>
                 <td className="p-2 border flex gap-2">
                   <button
@@ -247,7 +247,7 @@ export default function PosterList() {
                 />
               </div>
 
-              {/* Second row: Price and Description */}
+              {/* Second row: Price and Offer Price */}
               <div>
                 <label className="block mb-2">Price</label>
                 <input
@@ -261,8 +261,22 @@ export default function PosterList() {
               </div>
 
               <div>
+                <label className="block mb-2">Offer Price</label>
+                <input
+                  type="text"
+                  value={editedPosterData.offerPrice}
+                  onChange={(e) =>
+                    setEditedPosterData({ ...editedPosterData, offerPrice: e.target.value })
+                  }
+                  className="w-full p-2 border rounded mb-4"
+                />
+              </div>
+
+              {/* Third row: Description and Size */}
+              <div>
                 <label className="block mb-2">Description</label>
-                <textarea
+                <input
+                  type="text"
                   value={editedPosterData.description}
                   onChange={(e) =>
                     setEditedPosterData({ ...editedPosterData, description: e.target.value })
@@ -271,7 +285,6 @@ export default function PosterList() {
                 />
               </div>
 
-              {/* Third row: Size and Festival Date */}
               <div>
                 <label className="block mb-2">Size</label>
                 <input
@@ -284,38 +297,37 @@ export default function PosterList() {
                 />
               </div>
 
-              <div>
-                <label className="block mb-2">Festival Date</label>
+              {/* Last row: In Stock */}
+              <div className="col-span-2">
+                <label className="block mb-2">In Stock</label>
                 <input
-                  type="date"
-                  value={editedPosterData.festivalDate}
+                  type="checkbox"
+                  checked={editedPosterData.inStock}
                   onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, festivalDate: e.target.value })
+                    setEditedPosterData({ ...editedPosterData, inStock: e.target.checked })
                   }
-                  className="w-full p-2 border rounded mb-4"
+                  className="p-2 border rounded mb-4"
                 />
               </div>
             </div>
 
-            {/* Action buttons */}
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-end">
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded"
-                onClick={() => setModalOpen(false)}
+                onClick={handleSaveChanges}
+                className="bg-blue-500 text-white px-4 py-2 rounded mr-4"
               >
-                Cancel
+                Save
               </button>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-                onClick={handleSaveChanges}
+                onClick={() => setModalOpen(false)}
+                className="bg-gray-300 text-black px-4 py-2 rounded"
               >
-                Save Changes
+                Cancel
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

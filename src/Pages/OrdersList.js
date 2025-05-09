@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaEdit, FaTrash } from "react-icons/fa"; // Icons for Edit and Delete
+import { FaEdit, FaTrash } from "react-icons/fa";
 
 const OrdersList = () => {
   const [ordersData, setOrdersData] = useState([]);
@@ -10,11 +10,12 @@ const OrdersList = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
 
-  // Fetch data when the component mounts
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get("https://posterbnaobackend.onrender.com/api/users/allorders");
+        const response = await axios.get(
+          "https://posterbnaobackend.onrender.com/api/users/allorders"
+        );
         if (response.data && response.data.orders) {
           setOrdersData(response.data.orders);
         }
@@ -28,33 +29,33 @@ const OrdersList = () => {
     fetchOrders();
   }, []);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
-
   const handleEdit = (order) => {
     setSelectedOrder(order);
-    setNewStatus(order.status); // Set the initial status
-    setIsModalOpen(true); // Open the modal
+    setNewStatus(order.status);
+    setIsModalOpen(true);
   };
 
   const handleStatusChange = (e) => {
-    setNewStatus(e.target.value); // Update the status in the modal
+    setNewStatus(e.target.value);
   };
 
   const handleSaveStatus = async () => {
     if (selectedOrder) {
       try {
-        // Update status in the backend
-        await axios.put(`https://posterbnaobackend.onrender.com/api/users/orderstatus/${selectedOrder._id}`, { status: newStatus });
+        await axios.put(
+          `https://posterbnaobackend.onrender.com/api/users/orderstatus/${selectedOrder._id}`,
+          { status: newStatus }
+        );
 
-        // Update the status in the local state
         setOrdersData((prevOrders) =>
           prevOrders.map((order) =>
-            order._id === selectedOrder._id ? { ...order, status: newStatus } : order
+            order._id === selectedOrder._id
+              ? { ...order, status: newStatus }
+              : order
           )
         );
 
-        setIsModalOpen(false); // Close the modal
+        setIsModalOpen(false);
       } catch (err) {
         console.error("Error updating status", err);
       }
@@ -64,9 +65,9 @@ const OrdersList = () => {
   const handleDelete = async (orderId) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       try {
-        await axios.delete(`https://posterbnaobackend.onrender.com/api/users/order/${orderId}`); // Call the delete API
-
-        // Remove the order from the local state
+        await axios.delete(
+          `https://posterbnaobackend.onrender.com/api/users/order/${orderId}`
+        );
         setOrdersData(ordersData.filter((order) => order._id !== orderId));
         alert("Order deleted successfully.");
       } catch (err) {
@@ -74,6 +75,9 @@ const OrdersList = () => {
       }
     }
   };
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="p-6 max-w-6xl mx-auto bg-white shadow-lg rounded-lg">
@@ -101,13 +105,21 @@ const OrdersList = () => {
               {ordersData.map((order, index) => (
                 <tr key={order._id} className="border-b hover:bg-gray-50">
                   <td className="p-2 border">{index + 1}</td>
-                  <td className="p-2 border">{order.user.name}</td>
-                  <td className="p-2 border">{order.user.email}</td>
-                  <td className="p-2 border">{order.paymentDetails.method}</td>
-                  <td className="p-2 border">{order.poster.name}</td>
-                  <td className="p-2 border">₹{order.totalAmount}</td>
+                  <td className="p-2 border">{order.user?.name || "N/A"}</td>
+                  <td className="p-2 border">{order.user?.email || "N/A"}</td>
+                  <td className="p-2 border">
+                    {order.paymentMethod || order.paymentDetails?.method || "N/A"}
+                  </td>
+                  <td className="p-2 border">
+                    {order.poster?.name ||
+                      order.businessPoster?.name ||
+                      "N/A"}
+                  </td>
+                  <td className="p-2 border">₹{order.totalAmount || 0}</td>
                   <td className="p-2 border">{order.status}</td>
-                  <td className="p-2 border">{new Date(order.orderDate).toLocaleString()}</td>
+                  <td className="p-2 border">
+                    {new Date(order.orderDate).toLocaleString()}
+                  </td>
                   <td className="p-2 border text-center">
                     <div className="flex justify-center gap-2">
                       <button
@@ -137,7 +149,9 @@ const OrdersList = () => {
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h2 className="text-xl font-semibold">Edit Order Status</h2>
             <div className="my-4">
-              <label className="block mb-2" htmlFor="status">Status</label>
+              <label className="block mb-2" htmlFor="status">
+                Status
+              </label>
               <select
                 id="status"
                 value={newStatus}
@@ -147,7 +161,6 @@ const OrdersList = () => {
                 <option value="Completed">Completed</option>
                 <option value="Pending">Pending</option>
                 <option value="Cancelled">Cancelled</option>
-                {/* Add more options if needed */}
               </select>
             </div>
             <div className="flex justify-between gap-4">

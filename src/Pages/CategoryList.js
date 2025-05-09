@@ -7,6 +7,10 @@ export default function CategoryList() {
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [modalOpen, setModalOpen] = useState(false); // State to manage modal visibility
+  const [selectedCategory, setSelectedCategory] = useState(null); // State to hold the selected category
+  const [categoryName, setCategoryName] = useState(""); // For input fields
+  const [categoryImage, setCategoryImage] = useState("");
   const categoriesPerPage = 5;
 
   useEffect(() => {
@@ -42,6 +46,34 @@ export default function CategoryList() {
   const indexOfFirst = indexOfLast - categoriesPerPage;
   const currentCategories = filteredCategories.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
+
+  const handleEdit = (category) => {
+    setSelectedCategory(category);
+    setCategoryName(category.categoryName || "");
+    setCategoryImage(category.image || "");
+    setModalOpen(true);
+  };
+
+  const handleSaveChanges = () => {
+    const updatedCategory = {
+      ...selectedCategory,
+      categoryName,
+      image: categoryImage,
+    };
+
+    axios
+      .put(`https://posterbnaobackend.onrender.com/api/category/update-category/${selectedCategory._id}`, updatedCategory)
+      .then((res) => {
+        setCategories(categories.map((cat) => (cat._id === selectedCategory._id ? updatedCategory : cat)));
+        setModalOpen(false);
+        setSelectedCategory(null);
+        setCategoryName("");
+        setCategoryImage("");
+      })
+      .catch((error) => {
+        console.error("Error updating category:", error);
+      });
+  };
 
   return (
     <div className="p-4 border rounded-lg shadow-lg bg-white">
@@ -94,7 +126,10 @@ export default function CategoryList() {
                   {new Date(cat.createdAt).toLocaleDateString()}
                 </td>
                 <td className="p-2 border flex gap-2">
-                  <button className="bg-blue-500 text-white p-1 rounded">
+                  <button
+                    onClick={() => handleEdit(cat)}
+                    className="bg-blue-500 text-white p-1 rounded"
+                  >
                     <FaEdit />
                   </button>
                   <button className="bg-red-500 text-white p-1 rounded">
@@ -107,6 +142,7 @@ export default function CategoryList() {
         </table>
       </div>
 
+      {/* Pagination */}
       <div className="flex justify-center mt-4 gap-4">
         <button
           onClick={() => setCurrentPage(currentPage - 1)}
@@ -132,6 +168,47 @@ export default function CategoryList() {
           Next
         </button>
       </div>
+
+      {/* Edit Category Modal */}
+      {modalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-xl font-semibold mb-4">Edit Category</h3>
+            <div>
+              <label className="block mb-2">Category Name</label>
+              <input
+                type="text"
+                value={categoryName}
+                onChange={(e) => setCategoryName(e.target.value)}
+                className="w-full p-2 border rounded mb-4"
+              />
+            </div>
+            <div>
+              <label className="block mb-2">Category Image URL</label>
+              <input
+                type="text"
+                value={categoryImage}
+                onChange={(e) => setCategoryImage(e.target.value)}
+                className="w-full p-2 border rounded mb-4"
+              />
+            </div>
+            <div className="flex justify-between">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveChanges}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

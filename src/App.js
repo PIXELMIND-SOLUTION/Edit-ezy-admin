@@ -80,6 +80,7 @@ import AboutUsFormPage from "./Pages/AboutUsFormPage.js";
 import GetAboutUsPage from "./Pages/GetAboutUsPage.js";
 import ContactUsPage from "./Pages/ContactUsPage.js";
 import GetContactUsPage from "./Pages/GetContactUsPage.js";
+import BusinessPosterList from "./Pages/BusinessPosterList.js";
 
 
 
@@ -164,6 +165,7 @@ function App() {
               <Route path="/create-logo" element={<CreateLogo />} />
               <Route path="/logolist" element={<LogoList />} />
               <Route path="/create-businesscard" element={<CreateBusinessCard />} />
+              <Route path="/businesscardlist" element={<BusinessPosterList />} />
               <Route path="/create-plan" element={<CreatePlan />} />
               <Route path="/planlist" element={<PlanList />} />
               <Route path="/userplanlist" element={<UsersPlansList />} />

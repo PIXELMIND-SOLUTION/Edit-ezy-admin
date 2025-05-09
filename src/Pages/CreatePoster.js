@@ -6,6 +6,7 @@ const CreatePoster = () => {
   const [categoryName, setCategoryName] = useState('');
   const [price, setPrice] = useState('');
   const [images, setImages] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]); // For form submission
   const [description, setDescription] = useState('');
   const [festivalDate, setFestivalDate] = useState('');
   const [size, setSize] = useState('');
@@ -13,7 +14,7 @@ const CreatePoster = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [categories, setCategories] = useState([]);
 
-  // Fetch categories from the API
+  // Fetch categories
   useEffect(() => {
     axios
       .get('https://posterbnaobackend.onrender.com/api/category/getall-cateogry')
@@ -29,15 +30,16 @@ const CreatePoster = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const imageUrls = files.map((file) => URL.createObjectURL(file)); // Preview images
-    setImages(imageUrls);
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setImages(previews);
+    setImageFiles(files); // Save actual files for upload
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !categoryName || !price || !images.length || !description || !festivalDate || !size) {
-      setErrorMessage('All fields are required');
+    if (!name || !categoryName || !price || !imageFiles.length || !description || !size) {
+      setErrorMessage('Please fill all required fields.');
       return;
     }
 
@@ -46,30 +48,37 @@ const CreatePoster = () => {
     formData.append('categoryName', categoryName);
     formData.append('price', price);
     formData.append('description', description);
-    formData.append('festivalDate', festivalDate);
     formData.append('size', size);
     formData.append('inStock', inStock);
+    if (festivalDate) {
+      formData.append('festivalDate', festivalDate);
+    }
 
-    // Append images to the formData
-    images.forEach((image) => formData.append('images', image));
+    imageFiles.forEach((file) => formData.append('images', file));
 
     try {
-      const response = await axios.post('https://posterbnaobackend.onrender.com/api/poster/create-poster', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      console.log('Poster created:', response.data);
+      const response = await axios.post(
+        'https://posterbnaobackend.onrender.com/api/poster/create-poster',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
       alert('Poster created successfully!');
-      // Reset form after success
+      // Reset form
       setName('');
       setCategoryName('');
       setPrice('');
       setImages([]);
+      setImageFiles([]);
       setDescription('');
       setFestivalDate('');
       setSize('');
       setInStock(false);
+      setErrorMessage('');
     } catch (error) {
       console.error('Error creating poster:', error);
       setErrorMessage('Error creating poster. Please try again.');
@@ -85,7 +94,7 @@ const CreatePoster = () => {
             <label className="block text-lg font-medium mb-2">Poster Name</label>
             <input
               type="text"
-              className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter poster name"
@@ -95,7 +104,7 @@ const CreatePoster = () => {
           <div>
             <label className="block text-lg font-medium mb-2">Category Name</label>
             <select
-              className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             >
@@ -112,78 +121,78 @@ const CreatePoster = () => {
             <label className="block text-lg font-medium mb-2">Price</label>
             <input
               type="number"
-              className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Enter price"
             />
           </div>
 
-          <div>
+          <div className="col-span-1">
             <label className="block text-lg font-medium mb-2">Images</label>
             <input
               type="file"
-              className="w-full p-3 border rounded-lg shadow-sm focus:outline-none"
               accept="image/*"
               multiple
               onChange={handleImageChange}
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
             />
-            <div className="mt-2">
-              {images.length > 0 && (
-                <div className="flex space-x-2">
-                  {images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image}
-                      alt={`preview-${index}`}
-                      className="w-16 h-16 object-cover rounded-lg"
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+            {images.length > 0 && (
+              <div className="mt-2 flex space-x-2">
+                {images.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`preview-${idx}`}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
-          <div>
+          <div className="col-span-1">
             <label className="block text-lg font-medium mb-2">Description</label>
             <textarea
-              className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter poster description"
               rows="4"
+              placeholder="Enter poster description"
             />
           </div>
 
-          <div>
-            <label className="block text-lg font-medium mb-2">Festival Date</label>
+          <div className="col-span-1">
+            <label className="block text-lg font-medium mb-2">
+              Festival Date <span className="text-gray-500">(Optional)</span>
+            </label>
             <input
               type="date"
-              className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
               value={festivalDate}
               onChange={(e) => setFestivalDate(e.target.value)}
             />
           </div>
 
-          <div>
+          <div className="col-span-1">
             <label className="block text-lg font-medium mb-2">Size</label>
             <input
               type="text"
-              className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
               value={size}
               onChange={(e) => setSize(e.target.value)}
               placeholder="Enter size (e.g. A4, A3)"
             />
           </div>
 
-          <div className="col-span-2">
-            <label className="block text-lg font-medium mb-2">In Stock</label>
+          <div className="col-span-1 flex items-center gap-3 mt-8">
             <input
               type="checkbox"
-              className="p-3"
               checked={inStock}
               onChange={() => setInStock(!inStock)}
+              className="w-5 h-5"
             />
+            <label className="text-lg font-medium">In Stock</label>
           </div>
         </div>
 
@@ -192,7 +201,7 @@ const CreatePoster = () => {
         <div className="text-center">
           <button
             type="submit"
-            className="bg-blue-900 text-white p-3 rounded-lg shadow-md hover:bg-blue-900 transition duration-300"
+            className="bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition duration-300"
           >
             Create Poster
           </button>

@@ -64,7 +64,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       name: "Business Cards",
       dropdown: [
         { name: "Create Business Card", path: "/create-businesscard" },
-        { name: "Get All Business Cards", path: "/business-cards-list" },
+        { name: "Get All Business Cards", path: "/businesscardlist" },
       ],
     },
     {

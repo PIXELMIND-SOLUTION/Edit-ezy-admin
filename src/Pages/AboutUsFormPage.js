@@ -5,31 +5,60 @@ const AboutUsFormPage = () => {
   const [aboutContent, setAboutContent] = useState("");
   const [date, setDate] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // You can add the API call logic here to submit the form data to your backend.
-    // Example: axios.post('http://localhost:4000/api/about-us', { title, content, date });
+    try {
+      const response = await fetch("https://posterbnaobackend.onrender.com/api/admin/aboutus", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: aboutTitle,
+          content: aboutContent,
+          date,
+        }),
+      });
 
-    setSuccessMessage("About Us section saved successfully!");
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccessMessage(data.message || "About Us section saved successfully!");
+        setErrorMessage("");
+      } else {
+        setErrorMessage(data.message || "Failed to save About Us section.");
+        setSuccessMessage("");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setErrorMessage("Something went wrong. Please try again.");
+      setSuccessMessage("");
+    }
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-semibold text-blue-900 mb-6">Create About Us</h2>
 
-      {/* Success Message */}
       {successMessage && (
         <div className="bg-green-100 text-green-700 p-4 rounded mb-4">
           {successMessage}
         </div>
       )}
+      {errorMessage && (
+        <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
+          {errorMessage}
+        </div>
+      )}
 
-      {/* About Us Form */}
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label htmlFor="aboutTitle" className="block text-sm font-medium text-gray-700">Title</label>
+          <label htmlFor="aboutTitle" className="block text-sm font-medium text-gray-700">
+            Title
+          </label>
           <input
             type="text"
             id="aboutTitle"
@@ -42,7 +71,9 @@ const AboutUsFormPage = () => {
         </div>
 
         <div className="mb-4">
-          <label htmlFor="aboutContent" className="block text-sm font-medium text-gray-700">Content</label>
+          <label htmlFor="aboutContent" className="block text-sm font-medium text-gray-700">
+            Content
+          </label>
           <textarea
             id="aboutContent"
             value={aboutContent}
@@ -55,7 +86,9 @@ const AboutUsFormPage = () => {
         </div>
 
         <div className="mb-4">
-          <label htmlFor="date" className="block text-sm font-medium text-gray-700">Date</label>
+          <label htmlFor="date" className="block text-sm font-medium text-gray-700">
+            Date
+          </label>
           <input
             type="date"
             id="date"

@@ -1,29 +1,55 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const PrivacyPolicyForm = () => {
   const [policyTitle, setPolicyTitle] = useState("");
   const [policyContent, setPolicyContent] = useState("");
   const [date, setDate] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // You can add the API call logic here to submit the form data to your backend.
-    // Example: axios.post('http://localhost:4000/api/privacy-policy', { title, content, date });
+    setSuccessMessage("");
+    setErrorMessage("");
+    setLoading(true);
 
-    // For now, we're showing a success message after form submission.
-    setSuccessMessage("Privacy policy saved successfully!");
+    try {
+      const response = await axios.post("https://posterbnaobackend.onrender.com/api/admin/privacy-policy", {
+        title: policyTitle,
+        content: policyContent,
+        date,
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        setSuccessMessage("Privacy policy saved successfully!");
+        setPolicyTitle("");
+        setPolicyContent("");
+        setDate("");
+      }
+    } catch (error) {
+      console.error("Error saving privacy policy:", error);
+      setErrorMessage("Failed to save privacy policy. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-semibold text-blue-900 mb-6">Create Privacy Policy</h2>
 
-      {/* Success Message */}
+      {/* Success or Error Messages */}
       {successMessage && (
         <div className="bg-green-100 text-green-700 p-4 rounded mb-4">
           {successMessage}
+        </div>
+      )}
+      {errorMessage && (
+        <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
+          {errorMessage}
         </div>
       )}
 
@@ -70,9 +96,10 @@ const PrivacyPolicyForm = () => {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            disabled={loading}
+            className={`px-6 py-2 rounded text-white ${loading ? "bg-gray-500" : "bg-blue-600 hover:bg-blue-700"}`}
           >
-            Save Privacy Policy
+            {loading ? "Saving..." : "Save Privacy Policy"}
           </button>
         </div>
       </form>
