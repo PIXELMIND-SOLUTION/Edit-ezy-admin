@@ -139,8 +139,9 @@ export default function CategoryList() {
                     src={`https://posterbnaobackend.onrender.com/uploads/${cat.image}`}
                     alt={cat.categoryName}
                     className="w-12 h-12 rounded object-cover"
-                    onError={(e) => (e.target.src = "/default-category.jpg")}
+                    onError={(e) => (e.target.src = "https://via.placeholder.com/50")}
                   />
+
                 </td>
                 <td className="p-2 border">{cat.categoryName || "N/A"}</td>
                 <td className="p-2 border">{cat.subCategoryName || "—"}</td>
