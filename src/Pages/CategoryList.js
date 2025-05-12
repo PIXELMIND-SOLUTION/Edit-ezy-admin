@@ -135,13 +135,13 @@ export default function CategoryList() {
               <tr key={cat._id} className="border-b">
                 <td className="p-2 border">{index + 1 + indexOfFirst}</td>
                 <td className="p-2 border">
+                  {/* Image display */}
                   <img
-                    src={`https://posterbnaobackend.onrender.com/uploads/${cat.image}`}
+                    src={`https://posterbnaobackend.onrender.com/${cat.image}`}
                     alt={cat.categoryName}
                     className="w-12 h-12 rounded object-cover"
                     onError={(e) => (e.target.src = "https://via.placeholder.com/50")}
                   />
-
                 </td>
                 <td className="p-2 border">{cat.categoryName || "N/A"}</td>
                 <td className="p-2 border">{cat.subCategoryName || "—"}</td>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import axios from "axios";
 
 const LogoList = () => {
-  // State for logos, modal, and editing logo data
   const [logos, setLogos] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -10,32 +10,22 @@ const LogoList = () => {
   const [editedLogoData, setEditedLogoData] = useState({});
   const logosPerPage = 5;
 
+  // ✅ Fetch all logos
+  const fetchLogos = async () => {
+    try {
+      const res = await axios.get("https://posterbnaobackend.onrender.com/api/admin/getlogos");
+      setLogos(res.data); // Direct array response
+    } catch (error) {
+      console.error("Failed to fetch logos", error);
+    }
+  };
+
   useEffect(() => {
-    // Dummy data for logos (replace with your actual API)
-    setLogos([
-      {
-        id: 1,
-        logoName: "Tech Logo",
-        description: "A modern tech company logo.",
-        logoImage: "https://mir-s3-cdn-cf.behance.net/projects/original/ec753e129429523.61a1e79332f16.png",
-      },
-      {
-        id: 2,
-        logoName: "Food Logo",
-        description: "A logo for a food company.",
-        logoImage: "https://mir-s3-cdn-cf.behance.net/projects/original/ec753e129429523.61a1e79332f16.png",
-      },
-      {
-        id: 3,
-        logoName: "Travel Logo",
-        description: "A logo for a travel agency.",
-        logoImage: "https://mir-s3-cdn-cf.behance.net/projects/original/ec753e129429523.61a1e79332f16.png",
-      },
-    ]);
+    fetchLogos();
   }, []);
 
   const filteredLogos = logos.filter((logo) =>
-    logo.logoName.toLowerCase().includes(search.toLowerCase())
+    logo.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const indexOfLastLogo = currentPage * logosPerPage;
@@ -44,22 +34,36 @@ const LogoList = () => {
   const totalPages = Math.ceil(filteredLogos.length / logosPerPage);
 
   const handleEdit = (logo) => {
-    setEditedLogoData(logo); // Populate the modal with the current logo data
-    setModalOpen(true); // Open the modal
+    setEditedLogoData(logo);
+    setModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    setLogos(logos.filter((logo) => logo.id !== id));
-    alert("Logo deleted successfully!");
+  // ✅ Delete API
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`https://posterbnaobackend.onrender.com/api/admin/deletelogo/${id}`);
+      alert("Logo deleted successfully!");
+      fetchLogos(); // Refresh list
+    } catch (error) {
+      console.error("Delete failed", error);
+      alert("Failed to delete logo.");
+    }
   };
 
-  const handleSaveChanges = () => {
-    setLogos(
-      logos.map((logo) =>
-        logo.id === editedLogoData.id ? editedLogoData : logo
-      )
-    );
-    setModalOpen(false); // Close the modal
+  // ✅ Update API
+  const handleSaveChanges = async () => {
+    try {
+      await axios.put(
+        `https://posterbnaobackend.onrender.com/api/admin/updatelogo/${editedLogoData._id}`,
+        editedLogoData
+      );
+      alert("Logo updated successfully!");
+      setModalOpen(false);
+      fetchLogos(); // Refresh list
+    } catch (error) {
+      console.error("Update failed", error);
+      alert("Failed to update logo.");
+    }
   };
 
   return (
@@ -87,16 +91,16 @@ const LogoList = () => {
           </thead>
           <tbody>
             {currentLogos.map((logo, index) => (
-              <tr key={logo.id} className="border-b">
+              <tr key={logo._id} className="border-b">
                 <td className="p-2 border">{index + 1 + indexOfFirstLogo}</td>
                 <td className="p-2 border">
                   <img
-                    src={logo.logoImage}
-                    alt={logo.logoName}
+                    src={`https://posterbnaobackend.onrender.com/${logo.image}`}
+                    alt={logo.name}
                     className="w-12 h-12 object-cover rounded"
                   />
                 </td>
-                <td className="p-2 border">{logo.logoName}</td>
+                <td className="p-2 border">{logo.name}</td>
                 <td className="p-2 border">{logo.description}</td>
                 <td className="p-2 border flex gap-2">
                   <button
@@ -107,7 +111,7 @@ const LogoList = () => {
                   </button>
                   <button
                     className="bg-red-500 text-white p-1 rounded"
-                    onClick={() => handleDelete(logo.id)}
+                    onClick={() => handleDelete(logo._id)}
                   >
                     <FaTrash />
                   </button>
@@ -118,6 +122,7 @@ const LogoList = () => {
         </table>
       </div>
 
+      {/* Pagination */}
       <div className="flex justify-center mt-4 gap-4">
         <button
           onClick={() => setCurrentPage(currentPage - 1)}
@@ -130,7 +135,11 @@ const LogoList = () => {
           <button
             key={index}
             onClick={() => setCurrentPage(index + 1)}
-            className={`px-4 py-2 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+            className={`px-4 py-2 rounded ${
+              currentPage === index + 1
+                ? "bg-blue-500 text-white"
+                : "bg-gray-200"
+            }`}
           >
             {index + 1}
           </button>
@@ -144,7 +153,7 @@ const LogoList = () => {
         </button>
       </div>
 
-      {/* Edit Logo Modal */}
+      {/* Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
@@ -154,9 +163,12 @@ const LogoList = () => {
               <label className="block mb-2">Logo Name</label>
               <input
                 type="text"
-                value={editedLogoData.logoName}
+                value={editedLogoData.name}
                 onChange={(e) =>
-                  setEditedLogoData({ ...editedLogoData, logoName: e.target.value })
+                  setEditedLogoData({
+                    ...editedLogoData,
+                    name: e.target.value,
+                  })
                 }
                 className="w-full p-2 border rounded"
               />
@@ -168,7 +180,10 @@ const LogoList = () => {
                 type="text"
                 value={editedLogoData.description}
                 onChange={(e) =>
-                  setEditedLogoData({ ...editedLogoData, description: e.target.value })
+                  setEditedLogoData({
+                    ...editedLogoData,
+                    description: e.target.value,
+                  })
                 }
                 className="w-full p-2 border rounded"
               />
@@ -178,9 +193,12 @@ const LogoList = () => {
               <label className="block mb-2">Logo Image URL</label>
               <input
                 type="text"
-                value={editedLogoData.logoImage}
+                value={editedLogoData.image}
                 onChange={(e) =>
-                  setEditedLogoData({ ...editedLogoData, logoImage: e.target.value })
+                  setEditedLogoData({
+                    ...editedLogoData,
+                    image: e.target.value,
+                  })
                 }
                 className="w-full p-2 border rounded"
               />

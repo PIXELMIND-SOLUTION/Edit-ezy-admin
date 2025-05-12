@@ -81,6 +81,8 @@ import GetAboutUsPage from "./Pages/GetAboutUsPage.js";
 import ContactUsPage from "./Pages/ContactUsPage.js";
 import GetContactUsPage from "./Pages/GetContactUsPage.js";
 import BusinessPosterList from "./Pages/BusinessPosterList.js";
+import RegisterPage from "./Pages/Register.js";
+import GetProfilePage from "./Pages/GetProfilePage.js";
 
 
 
@@ -97,6 +99,7 @@ function App() {
         element={
           <AdminLayout>
             <Routes>
+              <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/department" element={<DepartmentList />} />
               <Route path="/subdepartment" element={<SubDepartmentList />} />
@@ -176,6 +179,7 @@ function App() {
               <Route path="/getaboutus" element={<GetAboutUsPage />} />
               <Route path="/contactus" element={<ContactUsPage />} />
               <Route path="/getcontactus" element={<GetContactUsPage />} />
+               <Route path="/profile" element={<GetProfilePage />} />
 
 
 
@@ -188,6 +192,7 @@ function App() {
           </AdminLayout>
         }
       />
+     <Route path="/register" element={<RegisterPage />} />
     </Routes>
   );
 }

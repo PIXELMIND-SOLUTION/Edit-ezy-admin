@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-
+import { useNavigate } from 'react-router-dom';
 
 const CreatePoster = () => {
   const [name, setName] = useState('');
@@ -15,8 +14,7 @@ const CreatePoster = () => {
   const [inStock, setInStock] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [categories, setCategories] = useState([]);
-    const navigate = useNavigate(); // Initialize useNavigate
-
+  const navigate = useNavigate();
 
   // Fetch categories
   useEffect(() => {
@@ -34,9 +32,11 @@ const CreatePoster = () => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setImages(previews); // For previewing images
-    setImageFiles(files); // For actual files to be uploaded
+    const previews = files.map((file) => URL.createObjectURL(file));  // For previewing images
+
+    // Append new images to the existing ones
+    setImages((prevImages) => [...prevImages, ...previews]);  // Update image previews
+    setImageFiles((prevFiles) => [...prevFiles, ...files]);  // Update image files for upload
   };
 
   const handleSubmit = async (e) => {
@@ -74,14 +74,14 @@ const CreatePoster = () => {
       );
 
       alert('Poster created successfully!');
-            navigate('/posterlist');  // This navigates to /posterlist page
+      navigate('/posterlist');  // This navigates to the /posterlist page
 
       // Reset form after successful submission
       setName('');
       setCategoryName('');
       setPrice('');
-      setImages([]);
-      setImageFiles([]);
+      setImages([]);  // Reset previews
+      setImageFiles([]);  // Reset files
       setDescription('');
       setFestivalDate('');
       setSize('');

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
 import { utils, writeFile } from "xlsx";
 import axios from "axios";
 
@@ -10,6 +10,10 @@ export default function UserList() {
   const usersPerPage = 5;
 
   useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = () => {
     axios
       .get("https://posterbnaobackend.onrender.com/api/admin/getallusers")
       .then((res) => {
@@ -20,7 +24,20 @@ export default function UserList() {
       .catch((error) => {
         console.error("Error fetching users:", error);
       });
-  }, []);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      try {
+        await axios.delete(`https://posterbnaobackend.onrender.com/api/admin/deleteuser/${id}`);
+        alert("User deleted successfully");
+        setUsers(users.filter((user) => user.id !== id)); // Update UI
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        alert("Failed to delete user");
+      }
+    }
+  };
 
   const exportData = (type) => {
     const exportUsers = filteredUsers.map(({ id, name, email, mobile }) => ({
@@ -69,7 +86,6 @@ export default function UserList() {
           <thead>
             <tr className="bg-purple-600 text-white">
               <th className="p-2 border">Sl</th>
-              <th className="p-2 border">Profile</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Email</th>
               <th className="p-2 border">Mobile</th>
@@ -80,20 +96,16 @@ export default function UserList() {
             {currentUsers.map((user, index) => (
               <tr key={user.id} className="border-b">
                 <td className="p-2 border">{index + 1 + indexOfFirstUser}</td>
-                <td className="p-2 border">
-                  <img
-                    src={user.profileImage}
-                    alt="profile"
-                    className="w-10 h-10 rounded-full object-cover"
-                    onError={(e) => (e.target.src = "/default-profile-image.jpg")}
-                  />
-                </td>
                 <td className="p-2 border">{user.name || "N/A"}</td>
                 <td className="p-2 border">{user.email || "N/A"}</td>
                 <td className="p-2 border">{user.mobile || "N/A"}</td>
-                <td className="p-2 border flex gap-2">
-                  <button className="bg-blue-500 text-white p-1 rounded"><FaEdit /></button>
-                  <button className="bg-red-500 text-white p-1 rounded"><FaTrash /></button>
+                <td className="p-2 border">
+                  <button
+                    className="bg-red-500 text-white p-1 rounded"
+                    onClick={() => handleDelete(user.id)}
+                  >
+                    <FaTrash />
+                  </button>
                 </td>
               </tr>
             ))}

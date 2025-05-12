@@ -9,6 +9,7 @@ export default function PosterList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [modalOpen, setModalOpen] = useState(false); // State for modal visibility
   const [selectedPoster, setSelectedPoster] = useState(null); // Store the poster being edited
+  const [selectedImages, setSelectedImages] = useState(null);
   const [editedPosterData, setEditedPosterData] = useState({
     name: "",
     categoryName: "",
@@ -78,10 +79,28 @@ export default function PosterList() {
   };
 
   const handleSaveChanges = () => {
+    // Create FormData to send images as well as other fields
+    const formData = new FormData();
+    formData.append("name", editedPosterData.name);
+    formData.append("categoryName", editedPosterData.categoryName);
+    formData.append("price", editedPosterData.price);
+    formData.append("description", editedPosterData.description);
+    formData.append("size", editedPosterData.size);
+    formData.append("festivalDate", editedPosterData.festivalDate);
+    formData.append("inStock", editedPosterData.inStock);
+
+    // Loop through any new images if selected
+    if (selectedImages) {
+      selectedImages.forEach((image) => {
+        formData.append("images", image);
+      });
+    }
+
     axios
       .put(
-        `https://posterbnaobackend.onrender.com/api/poster/update/${selectedPoster._id}`,
-        editedPosterData
+        `https://posterbnaobackend.onrender.com/api/poster/editposter/${selectedPoster._id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
       )
       .then((res) => {
         alert("Poster updated successfully!");
@@ -96,7 +115,7 @@ export default function PosterList() {
 
   const handleDelete = (id) => {
     axios
-      .delete(`https://posterbnaobackend.onrender.com/api/poster/delete/${id}`)
+      .delete(`https://posterbnaobackend.onrender.com/api/poster/deleteposter/${id}`)
       .then((res) => {
         alert("Poster deleted successfully!");
         setPosters(posters.filter((poster) => poster._id !== id));
@@ -150,18 +169,18 @@ export default function PosterList() {
               <tr key={poster._id} className="border-b">
                 <td className="p-2 border">{index + 1 + indexOfFirstPoster}</td>
                 <td className="p-2 border">
-  <div className="flex gap-2">
-    {poster.images.slice(0, 3).map((image, idx) => (
-      <img
-        key={idx}
-        src={`https://posterbnaobackend.onrender.com/uploads/${image}`}  // Prepend the server URL to the image path
-        alt={`poster-image-${idx}`}
-        className="w-12 h-12 object-cover rounded"
-        onError={(e) => (e.target.src = "/default-image.jpg")} // Fallback image if error occurs
-      />
-    ))}
-  </div>
-</td>
+                  <div className="flex gap-2">
+                    {poster.images.slice(0, 3).map((image, idx) => (
+                      <img
+                        key={idx}
+                        src={`https://posterbnaobackend.onrender.com/${image}`}  // Prepend the server URL to the image path
+                        alt={`poster-image-${idx}`}
+                        className="w-12 h-12 object-cover rounded"
+                        onError={(e) => (e.target.src = "/default-image.jpg")} // Fallback image if error occurs
+                      />
+                    ))}
+                  </div>
+                </td>
                 <td className="p-2 border">{poster.name || "N/A"}</td>
                 <td className="p-2 border">{poster.categoryName || "N/A"}</td>
                 <td className="p-2 border">{poster.price || "N/A"}</td>
@@ -189,49 +208,20 @@ export default function PosterList() {
         </table>
       </div>
 
-      <div className="flex justify-center mt-4 gap-4">
-        <button
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Previous
-        </button>
-        {[...Array(totalPages)].map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentPage(index + 1)}
-            className={`px-4 py-2 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-          >
-            {index + 1}
-          </button>
-        ))}
-        <button
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Edit Poster Modal */}
+      {/* Modal for editing poster */}
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-xl font-semibold mb-4">Edit Poster</h3>
 
-            {/* Use a flex container for the form fields */}
+            {/* Poster Edit Form */}
             <div className="grid grid-cols-2 gap-4">
-              {/* First row: Name and Category */}
               <div>
                 <label className="block mb-2">Name</label>
                 <input
                   type="text"
                   value={editedPosterData.name}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, name: e.target.value })
-                  }
+                  onChange={(e) => setEditedPosterData({ ...editedPosterData, name: e.target.value })}
                   className="w-full p-2 border rounded mb-4"
                 />
               </div>
@@ -241,22 +231,17 @@ export default function PosterList() {
                 <input
                   type="text"
                   value={editedPosterData.categoryName}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, categoryName: e.target.value })
-                  }
+                  onChange={(e) => setEditedPosterData({ ...editedPosterData, categoryName: e.target.value })}
                   className="w-full p-2 border rounded mb-4"
                 />
               </div>
 
-              {/* Second row: Price and Description */}
               <div>
                 <label className="block mb-2">Price</label>
                 <input
                   type="text"
                   value={editedPosterData.price}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, price: e.target.value })
-                  }
+                  onChange={(e) => setEditedPosterData({ ...editedPosterData, price: e.target.value })}
                   className="w-full p-2 border rounded mb-4"
                 />
               </div>
@@ -265,22 +250,17 @@ export default function PosterList() {
                 <label className="block mb-2">Description</label>
                 <textarea
                   value={editedPosterData.description}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, description: e.target.value })
-                  }
+                  onChange={(e) => setEditedPosterData({ ...editedPosterData, description: e.target.value })}
                   className="w-full p-2 border rounded mb-4"
                 />
               </div>
 
-              {/* Third row: Size and Festival Date */}
               <div>
                 <label className="block mb-2">Size</label>
                 <input
                   type="text"
                   value={editedPosterData.size}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, size: e.target.value })
-                  }
+                  onChange={(e) => setEditedPosterData({ ...editedPosterData, size: e.target.value })}
                   className="w-full p-2 border rounded mb-4"
                 />
               </div>
@@ -290,43 +270,59 @@ export default function PosterList() {
                 <input
                   type="date"
                   value={editedPosterData.festivalDate}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, festivalDate: e.target.value })
-                  }
+                  onChange={(e) => setEditedPosterData({ ...editedPosterData, festivalDate: e.target.value })}
                   className="w-full p-2 border rounded mb-4"
                 />
               </div>
 
-              <div>
+              <div className="col-span-2">
                 <label className="block mb-2">In Stock</label>
                 <input
                   type="checkbox"
                   checked={editedPosterData.inStock}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, inStock: e.target.checked })
-                  }
-                  className="w-full p-2 border rounded mb-4"
+                  onChange={(e) => setEditedPosterData({ ...editedPosterData, inStock: e.target.checked })}
+                  className="mr-2"
                 />
+                In Stock
               </div>
             </div>
 
-            <div className="mt-4 flex justify-end">
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setModalOpen(false)}
+                className="bg-gray-300 px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
               <button
                 onClick={handleSaveChanges}
                 className="bg-blue-500 text-white px-4 py-2 rounded"
               >
                 Save Changes
               </button>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="bg-gray-300 text-black px-4 py-2 rounded ml-2"
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Pagination */}
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+          className="bg-blue-500 text-white p-2 rounded"
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+          className="bg-blue-500 text-white p-2 rounded"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }

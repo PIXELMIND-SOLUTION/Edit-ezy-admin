@@ -12,8 +12,16 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("https://credenhealth.onrender.com/api/admin/logout", {}, { withCredentials: true });
+      // Get API URL based on environment
+      const apiUrl = process.env.REACT_APP_API_URL || "https://posterbnaobackend.onrender.com";
+
+      // Make the POST request to the logout API
+      await axios.post(`${apiUrl}/api/admin/logout`, {}, { withCredentials: true });
+
+      // Remove the token from localStorage
       localStorage.removeItem("authToken");
+
+      // Alert the user and redirect to login
       alert("Logout successful");
       window.location.href = "/";
     } catch (error) {
@@ -93,6 +101,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
         { name: "Get AboutUs", path: "/getaboutus" },
         { name: "Create ContactUs", path: "/contactus" },
         { name: "Get ContactUs", path: "/getcontactus" },
+        { name: "Profile", path: "/profile" },
       ],
     },
     {
@@ -104,9 +113,8 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
 
   return (
     <div
-    className={`transition-all duration-300 ${isMobile ? (isCollapsed ? "w-0" : "w-64") : isCollapsed ? "w-16" : "w-64"} h-screen overflow-y-scroll no-scrollbar flex flex-col bg-gradient-to-b from-gray-800 to-blue-800`}
-  >
-  
+      className={`transition-all duration-300 ${isMobile ? (isCollapsed ? "w-0" : "w-64") : isCollapsed ? "w-16" : "w-64"} h-screen overflow-y-scroll no-scrollbar flex flex-col bg-gradient-to-b from-gray-800 to-blue-800`}
+    >
       <div className="sticky top-0 p-4 font-bold text-white flex justify-center text-xl bg-[#1F2937] border-b border-gray-700">
         <span>Admin Panel</span>
       </div>

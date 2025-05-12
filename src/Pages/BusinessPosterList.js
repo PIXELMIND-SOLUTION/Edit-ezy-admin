@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
-import { utils, writeFile } from "xlsx";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import { utils, writeFile } from "xlsx";
+import { FaEdit, FaTrash } from "react-icons/fa";
 
-export default function BusinessPosterList() {
-  const [posters, setPosters] = useState([]);
+const BusinessCardList = () => {
+  const [cards, setCards] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [modalOpen, setModalOpen] = useState(false); // State for modal visibility
-  const [selectedPoster, setSelectedPoster] = useState(null); // Store the poster being edited
-  const [editedPosterData, setEditedPosterData] = useState({
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
+  const [editedCardData, setEditedCardData] = useState({
     name: "",
-    categoryName: "",
+    category: "",
     price: "",
     offerPrice: "",
     description: "",
@@ -19,166 +19,162 @@ export default function BusinessPosterList() {
     inStock: false,
   });
 
-  const postersPerPage = 5;
+  const cardsPerPage = 5;
 
   useEffect(() => {
-    axios
-      .get("https://posterbnaobackend.onrender.com/api/business/businessposters")
-      .then((res) => {
-        if (res.data) {
-          setPosters(res.data);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching business posters:", error);
-      });
+    fetchCards();
   }, []);
 
-  const exportData = (type) => {
-    const exportPosters = filteredPosters.map(
-      ({ _id, name, categoryName, price, offerPrice, description, size, inStock }) => ({
-        id: _id,
-        name: name || "N/A",
-        categoryName: categoryName || "N/A",
-        price: price || "N/A",
-        offerPrice: offerPrice || "N/A",
-        description: description || "N/A",
-        size: size || "N/A",
-        inStock: inStock ? "In Stock" : "Out of Stock",
+  const fetchCards = () => {
+    axios
+      .get("https://posterbnaobackend.onrender.com/api/admin/getbusinesscards")
+      .then((res) => {
+        if (res.data) {
+          setCards(res.data);
+        }
       })
-    );
-    const ws = utils.json_to_sheet(exportPosters);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Business Posters");
-    writeFile(wb, `business_posters.${type}`);
+      .catch((err) => console.error("Error fetching cards:", err));
   };
 
-  const filteredPosters = posters.filter((poster) => {
-    return poster.name.toLowerCase().includes(search.toLowerCase());
-  });
+  const exportData = (type) => {
+    const exportData = filteredCards.map(
+      ({ _id, name, category, price, offerPrice, description, size, inStock }) => ({
+        id: _id,
+        name,
+        category,
+        price,
+        offerPrice,
+        description,
+        size,
+        inStock: inStock ? "Yes" : "No",
+      })
+    );
+    const ws = utils.json_to_sheet(exportData);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Business Cards");
+    writeFile(wb, `business_cards.${type}`);
+  };
 
-  const indexOfLastPoster = currentPage * postersPerPage;
-  const indexOfFirstPoster = indexOfLastPoster - postersPerPage;
-  const currentPosters = filteredPosters.slice(indexOfFirstPoster, indexOfLastPoster);
-  const totalPages = Math.ceil(filteredPosters.length / postersPerPage);
+  const filteredCards = cards.filter((card) =>
+    card.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-  const handleEdit = (poster) => {
-    setSelectedPoster(poster);
-    setEditedPosterData({
-      name: poster.name,
-      categoryName: poster.categoryName,
-      price: poster.price,
-      offerPrice: poster.offerPrice,
-      description: poster.description,
-      size: poster.size,
-      inStock: poster.inStock,
+  const indexOfLast = currentPage * cardsPerPage;
+  const indexOfFirst = indexOfLast - cardsPerPage;
+  const currentCards = filteredCards.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filteredCards.length / cardsPerPage);
+
+  const handleEdit = (card) => {
+    setSelectedCard(card);
+    setEditedCardData({
+      name: card.name,
+      category: card.category,
+      price: card.price,
+      offerPrice: card.offerPrice,
+      description: card.description,
+      size: card.size,
+      inStock: card.inStock,
     });
-    setModalOpen(true); // Open the modal
+    setModalOpen(true);
   };
 
   const handleSaveChanges = () => {
     axios
-      .put(
-        `http://localhost:4000/api/business/update/${selectedPoster._id}`,
-        editedPosterData
-      )
-      .then((res) => {
-        alert("Poster updated successfully!");
-        setPosters(posters.map((poster) => (poster._id === selectedPoster._id ? { ...poster, ...editedPosterData } : poster)));
-        setModalOpen(false); // Close the modal
-        setSelectedPoster(null);
+      .put(`https://posterbnaobackend.onrender.com/api/admin/updatebusinesscard/${selectedCard._id}`, editedCardData)
+      .then(() => {
+        alert("Business Card updated successfully!");
+        fetchCards();
+        setModalOpen(false);
+        setSelectedCard(null);
       })
-      .catch((error) => {
-        console.error("Error updating business poster:", error);
+      .catch((err) => {
+        console.error("Update failed:", err);
+        alert("Failed to update card.");
       });
   };
 
   const handleDelete = (id) => {
+    if (!window.confirm("Are you sure you want to delete this card?")) return;
     axios
-      .delete(`http://localhost:4000/api/business/delete/${id}`)
-      .then((res) => {
-        alert("Poster deleted successfully!");
-        setPosters(posters.filter((poster) => poster._id !== id));
+      .delete(`https://posterbnaobackend.onrender.com/api/admin/deletebusinesscard/${id}`)
+      .then(() => {
+        alert("Card deleted successfully!");
+        setCards(cards.filter((card) => card._id !== id));
       })
-      .catch((error) => {
-        console.error("Error deleting business poster:", error);
+      .catch((err) => {
+        console.error("Delete failed:", err);
+        alert("Failed to delete card.");
       });
   };
 
   return (
     <div className="p-4 border rounded-lg shadow-lg bg-white">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-blue-900">Business Posters</h2>
-      </div>
-
-      <div className="flex justify-between mb-4">
-        <input
-          className="w-1/3 p-2 border rounded"
-          placeholder="Search by poster name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <h2 className="text-xl font-semibold text-blue-900">Business Cards</h2>
         <div className="flex gap-2">
           <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("csv")}>
-            CSV
+            Export CSV
           </button>
           <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("xlsx")}>
-            Excel
+            Export Excel
           </button>
         </div>
       </div>
 
-      <div className="overflow-x-auto mb-4">
-        <table className="w-full border-collapse border border-gray-300">
+      <div className="mb-4">
+        <input
+          className="w-full p-2 border rounded"
+          placeholder="Search by name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse border border-gray-300 text-sm">
           <thead>
-            <tr className="bg-purple-600 text-white">
-              <th className="p-2 border">Sl</th>
+            <tr className="bg-blue-800 text-white">
+              <th className="p-2 border">#</th>
               <th className="p-2 border">Images</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Category</th>
               <th className="p-2 border">Price</th>
-              <th className="p-2 border">Offer Price</th>
-              <th className="p-2 border">Description</th>
+              <th className="p-2 border">Offer</th>
+              <th className="p-2 border">Desc</th>
               <th className="p-2 border">Size</th>
-              <th className="p-2 border">In Stock</th>
+              <th className="p-2 border">Stock</th>
               <th className="p-2 border">Action</th>
             </tr>
           </thead>
           <tbody>
-            {currentPosters.map((poster, index) => (
-              <tr key={poster._id} className="border-b">
-                <td className="p-2 border">{index + 1 + indexOfFirstPoster}</td>
+            {currentCards.map((card, idx) => (
+              <tr key={card._id}>
+                <td className="p-2 border">{indexOfFirst + idx + 1}</td>
                 <td className="p-2 border">
                   <div className="flex gap-2">
-                    {poster.images.slice(0, 3).map((image, idx) => (
+                    {card.images?.slice(0, 2).map((img, i) => (
                       <img
-                        key={idx}
-                        src={image}
-                        alt={`poster-image-${idx}`}
-                        className="w-12 h-12 object-cover rounded"
+                        key={i}
+                        src={`https://posterbnaobackend.onrender.com/${img}`}
+                        alt="img"
+                        className="w-10 h-10 object-cover rounded"
                         onError={(e) => (e.target.src = "/default-image.jpg")}
                       />
                     ))}
                   </div>
                 </td>
-                <td className="p-2 border">{poster.name || "N/A"}</td>
-                <td className="p-2 border">{poster.categoryName || "N/A"}</td>
-                <td className="p-2 border">{poster.price || "N/A"}</td>
-                <td className="p-2 border">{poster.offerPrice || "N/A"}</td>
-                <td className="p-2 border">{poster.description || "N/A"}</td>
-                <td className="p-2 border">{poster.size || "N/A"}</td>
-                <td className="p-2 border">{poster.inStock ? "In Stock" : "Out of Stock"}</td>
-                <td className="p-2 border flex gap-2">
-                  <button
-                    className="bg-blue-500 text-white p-1 rounded"
-                    onClick={() => handleEdit(poster)}
-                  >
+                <td className="p-2 border">{card.name}</td>
+                <td className="p-2 border">{card.category}</td>
+                <td className="p-2 border">₹{card.price}</td>
+                <td className="p-2 border">₹{card.offerPrice}</td>
+                <td className="p-2 border">{card.description}</td>
+                <td className="p-2 border">{card.size}</td>
+                <td className="p-2 border">{card.inStock ? "Yes" : "No"}</td>
+                <td className="p-2 border flex gap-1">
+                  <button className="bg-blue-500 text-white p-1 rounded" onClick={() => handleEdit(card)}>
                     <FaEdit />
                   </button>
-                  <button
-                    className="bg-red-500 text-white p-1 rounded"
-                    onClick={() => handleDelete(poster._id)}
-                  >
+                  <button className="bg-red-500 text-white p-1 rounded" onClick={() => handleDelete(card._id)}>
                     <FaTrash />
                   </button>
                 </td>
@@ -188,140 +184,63 @@ export default function BusinessPosterList() {
         </table>
       </div>
 
-      <div className="flex justify-center mt-4 gap-4">
+      {/* Pagination */}
+      <div className="flex justify-center mt-4 gap-2">
         <button
-          onClick={() => setCurrentPage(currentPage - 1)}
+          className="px-3 py-1 bg-gray-200 rounded"
           disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setCurrentPage((p) => p - 1)}
         >
-          Previous
+          Prev
         </button>
-        {[...Array(totalPages)].map((_, index) => (
+        {[...Array(totalPages)].map((_, i) => (
           <button
-            key={index}
-            onClick={() => setCurrentPage(index + 1)}
-            className={`px-4 py-2 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+            key={i}
+            className={`px-3 py-1 rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-100"}`}
+            onClick={() => setCurrentPage(i + 1)}
           >
-            {index + 1}
+            {i + 1}
           </button>
         ))}
         <button
-          onClick={() => setCurrentPage(currentPage + 1)}
+          className="px-3 py-1 bg-gray-200 rounded"
           disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setCurrentPage((p) => p + 1)}
         >
           Next
         </button>
       </div>
 
-      {/* Edit Poster Modal */}
+      {/* Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg w-1/3">
-            <h3 className="text-xl font-semibold mb-4">Edit Poster</h3>
-
-            {/* Use a flex container for the form fields */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* First row: Name and Category */}
-              <div>
-                <label className="block mb-2">Name</label>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded w-[400px]">
+            <h3 className="text-lg font-semibold mb-4">Edit Business Card</h3>
+            <div className="grid grid-cols-1 gap-3">
+              {["name", "category", "price", "offerPrice", "description", "size"].map((field) => (
                 <input
+                  key={field}
                   type="text"
-                  value={editedPosterData.name}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, name: e.target.value })
-                  }
-                  className="w-full p-2 border rounded mb-4"
+                  placeholder={field}
+                  value={editedCardData[field]}
+                  onChange={(e) => setEditedCardData({ ...editedCardData, [field]: e.target.value })}
+                  className="p-2 border rounded"
                 />
-              </div>
-
-              <div>
-                <label className="block mb-2">Category</label>
-                <input
-                  type="text"
-                  value={editedPosterData.categoryName}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, categoryName: e.target.value })
-                  }
-                  className="w-full p-2 border rounded mb-4"
-                />
-              </div>
-
-              {/* Second row: Price and Offer Price */}
-              <div>
-                <label className="block mb-2">Price</label>
-                <input
-                  type="text"
-                  value={editedPosterData.price}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, price: e.target.value })
-                  }
-                  className="w-full p-2 border rounded mb-4"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2">Offer Price</label>
-                <input
-                  type="text"
-                  value={editedPosterData.offerPrice}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, offerPrice: e.target.value })
-                  }
-                  className="w-full p-2 border rounded mb-4"
-                />
-              </div>
-
-              {/* Third row: Description and Size */}
-              <div>
-                <label className="block mb-2">Description</label>
-                <input
-                  type="text"
-                  value={editedPosterData.description}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, description: e.target.value })
-                  }
-                  className="w-full p-2 border rounded mb-4"
-                />
-              </div>
-
-              <div>
-                <label className="block mb-2">Size</label>
-                <input
-                  type="text"
-                  value={editedPosterData.size}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, size: e.target.value })
-                  }
-                  className="w-full p-2 border rounded mb-4"
-                />
-              </div>
-
-              {/* Last row: In Stock */}
-              <div className="col-span-2">
-                <label className="block mb-2">In Stock</label>
+              ))}
+              <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
-                  checked={editedPosterData.inStock}
-                  onChange={(e) =>
-                    setEditedPosterData({ ...editedPosterData, inStock: e.target.checked })
-                  }
-                  className="p-2 border rounded mb-4"
+                  checked={editedCardData.inStock}
+                  onChange={(e) => setEditedCardData({ ...editedCardData, inStock: e.target.checked })}
                 />
+                <label>In Stock</label>
               </div>
             </div>
-
-            <div className="flex justify-end">
-              <button
-                onClick={handleSaveChanges}
-                className="bg-blue-500 text-white px-4 py-2 rounded mr-4"
-              >
+            <div className="flex justify-end mt-4 gap-2">
+              <button onClick={handleSaveChanges} className="bg-blue-500 text-white px-4 py-2 rounded">
                 Save
               </button>
-              <button
-                onClick={() => setModalOpen(false)}
-                className="bg-gray-300 text-black px-4 py-2 rounded"
-              >
+              <button onClick={() => setModalOpen(false)} className="bg-gray-300 px-4 py-2 rounded">
                 Cancel
               </button>
             </div>
@@ -330,4 +249,6 @@ export default function BusinessPosterList() {
       )}
     </div>
   );
-}
+};
+
+export default BusinessCardList;
