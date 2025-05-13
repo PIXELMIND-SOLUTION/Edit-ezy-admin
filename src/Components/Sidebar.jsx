@@ -13,7 +13,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
   const handleLogout = async () => {
     try {
       // Get API URL based on environment
-      const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:4000";
+      const apiUrl = process.env.REACT_APP_API_URL || "https://posterbackend.onrender.com";
 
       // Make the POST request to the logout API
       await axios.post(`${apiUrl}/api/admin/logout`, {}, { withCredentials: true });
