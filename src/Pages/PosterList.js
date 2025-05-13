@@ -24,7 +24,7 @@ export default function PosterList() {
 
   useEffect(() => {
     axios
-      .get("https://posterbnaobackend.onrender.com/api/poster/getallposter")
+      .get("https://posterbackend.onrender.com/api/poster/getallposter")
       .then((res) => {
         if (res.data) {
           setPosters(res.data);
@@ -98,7 +98,7 @@ export default function PosterList() {
 
     axios
       .put(
-        `https://posterbnaobackend.onrender.com/api/poster/editposter/${selectedPoster._id}`,
+        `https://posterbackend.onrender.com/api/poster/editposter/${selectedPoster._id}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       )
@@ -115,7 +115,7 @@ export default function PosterList() {
 
   const handleDelete = (id) => {
     axios
-      .delete(`https://posterbnaobackend.onrender.com/api/poster/deleteposter/${id}`)
+      .delete(`https://posterbackend.onrender.com/api/poster/deleteposter/${id}`)
       .then((res) => {
         alert("Poster deleted successfully!");
         setPosters(posters.filter((poster) => poster._id !== id));
@@ -173,7 +173,7 @@ export default function PosterList() {
                     {poster.images.slice(0, 3).map((image, idx) => (
                       <img
                         key={idx}
-                        src={`https://posterbnaobackend.onrender.com/${image}`}  // Prepend the server URL to the image path
+                        src={`https://posterbackend.onrender.com${image}`}  // Prepend the server URL to the image path
                         alt={`poster-image-${idx}`}
                         className="w-12 h-12 object-cover rounded"
                         onError={(e) => (e.target.src = "/default-image.jpg")} // Fallback image if error occurs

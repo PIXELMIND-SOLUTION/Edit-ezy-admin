@@ -21,7 +21,7 @@ const ContactUsPage = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("https://posterbnaobackend.onrender.com/api/admin/contact", formData);
+      const res = await axios.post("https://posterbackend.onrender.com/api/admin/contact", formData);
       if (res.status === 201) {
         setSuccessMessage(res.data.message);
         setFormData({

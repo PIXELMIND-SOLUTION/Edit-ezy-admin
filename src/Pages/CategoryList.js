@@ -15,8 +15,9 @@ export default function CategoryList() {
   const categoriesPerPage = 5;
 
   useEffect(() => {
+    // Use the local server URL here
     axios
-      .get("https://posterbnaobackend.onrender.com/api/category/getall-cateogry")
+      .get("https://posterbackend.onrender.com/api/category/getall-cateogry")  // Changed URL to localhost
       .then((res) => {
         if (res.data && res.data.categories) {
           setCategories(res.data.categories);
@@ -65,8 +66,9 @@ export default function CategoryList() {
       image: categoryImage,
     };
 
+    // Update API call to localhost
     axios
-      .put(`https://posterbnaobackend.onrender.com/api/category/update/${selectedCategory._id}`, updatedCategory)
+      .put(`https://posterbackend.onrender.com/api/category/update/${selectedCategory._id}`, updatedCategory)  // Changed URL to localhost
       .then(() => {
         setCategories(categories.map((cat) => (cat._id === selectedCategory._id ? updatedCategory : cat)));
         setModalOpen(false);
@@ -78,8 +80,9 @@ export default function CategoryList() {
   };
 
   const handleDelete = (id) => {
+    // Delete API call to localhost
     axios
-      .delete(`https://posterbnaobackend.onrender.com/api/category/delete/${id}`)
+      .delete(`https://posterbackend.onrender.com/api/category/delete/${id}`)  // Changed URL to localhost
       .then(() => {
         setCategories(categories.filter((cat) => cat._id !== id));
       })
@@ -137,7 +140,7 @@ export default function CategoryList() {
                 <td className="p-2 border">
                   {/* Image display */}
                   <img
-                    src={`https://posterbnaobackend.onrender.com/${cat.image}`}
+                    src={`https://posterbackend.onrender.com${cat.image}`}  // Changed image URL to localhost
                     alt={cat.categoryName}
                     className="w-12 h-12 rounded object-cover"
                     onError={(e) => (e.target.src = "https://via.placeholder.com/50")}

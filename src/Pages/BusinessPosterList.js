@@ -27,7 +27,7 @@ const BusinessCardList = () => {
 
   const fetchCards = () => {
     axios
-      .get("https://posterbnaobackend.onrender.com/api/admin/getbusinesscards")
+      .get("https://posterbackend.onrender.com/api/admin/getbusinesscards")
       .then((res) => {
         if (res.data) {
           setCards(res.data);
@@ -80,7 +80,7 @@ const BusinessCardList = () => {
 
   const handleSaveChanges = () => {
     axios
-      .put(`https://posterbnaobackend.onrender.com/api/admin/updatebusinesscard/${selectedCard._id}`, editedCardData)
+      .put(`https://posterbackend.onrender.com/api/admin/updatebusinesscard/${selectedCard._id}`, editedCardData)
       .then(() => {
         alert("Business Card updated successfully!");
         fetchCards();
@@ -96,7 +96,7 @@ const BusinessCardList = () => {
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this card?")) return;
     axios
-      .delete(`https://posterbnaobackend.onrender.com/api/admin/deletebusinesscard/${id}`)
+      .delete(`https://posterbackend.onrender.com/api/admin/deletebusinesscard/${id}`)
       .then(() => {
         alert("Card deleted successfully!");
         setCards(cards.filter((card) => card._id !== id));
@@ -155,7 +155,7 @@ const BusinessCardList = () => {
                     {card.images?.slice(0, 2).map((img, i) => (
                       <img
                         key={i}
-                        src={`https://posterbnaobackend.onrender.com/${img}`}
+                        src={`https://posterbackend.onrender.com${img}`}
                         alt="img"
                         className="w-10 h-10 object-cover rounded"
                         onError={(e) => (e.target.src = "/default-image.jpg")}

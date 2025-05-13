@@ -19,7 +19,7 @@ const GetProfilePage = () => {
 
       try {
         // Make the API call to get the admin profile using adminId
-        const response = await axios.get(`https://posterbnaobackend.onrender.com/api/admin/profile/${adminId}`);
+        const response = await axios.get(`https://posterbackend.onrender.com/api/admin/profile/${adminId}`);
         
         // Log the response to check the profile data
         console.log("Profile Data Response:", response.data);

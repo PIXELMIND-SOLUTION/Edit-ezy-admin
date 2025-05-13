@@ -13,7 +13,7 @@ const LogoList = () => {
   // ✅ Fetch all logos
   const fetchLogos = async () => {
     try {
-      const res = await axios.get("https://posterbnaobackend.onrender.com/api/admin/getlogos");
+      const res = await axios.get("https://posterbackend.onrender.com/api/admin/getlogos");
       setLogos(res.data); // Direct array response
     } catch (error) {
       console.error("Failed to fetch logos", error);
@@ -41,7 +41,7 @@ const LogoList = () => {
   // ✅ Delete API
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`https://posterbnaobackend.onrender.com/api/admin/deletelogo/${id}`);
+      await axios.delete(`https://posterbackend.onrender.com/api/admin/deletelogo/${id}`);
       alert("Logo deleted successfully!");
       fetchLogos(); // Refresh list
     } catch (error) {
@@ -54,7 +54,7 @@ const LogoList = () => {
   const handleSaveChanges = async () => {
     try {
       await axios.put(
-        `https://posterbnaobackend.onrender.com/api/admin/updatelogo/${editedLogoData._id}`,
+        `https://posterbackend.onrender.com/api/admin/updatelogo/${editedLogoData._id}`,
         editedLogoData
       );
       alert("Logo updated successfully!");
@@ -95,7 +95,7 @@ const LogoList = () => {
                 <td className="p-2 border">{index + 1 + indexOfFirstLogo}</td>
                 <td className="p-2 border">
                   <img
-                    src={`https://posterbnaobackend.onrender.com/${logo.image}`}
+                    src={`https://posterbackend.onrender.com${logo.image}`}
                     alt={logo.name}
                     className="w-12 h-12 object-cover rounded"
                   />

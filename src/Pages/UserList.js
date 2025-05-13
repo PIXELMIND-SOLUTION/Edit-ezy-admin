@@ -15,7 +15,7 @@ export default function UserList() {
 
   const fetchUsers = () => {
     axios
-      .get("https://posterbnaobackend.onrender.com/api/admin/getallusers")
+      .get("https://posterbackend.onrender.com/api/admin/getallusers")
       .then((res) => {
         if (res.data && res.data.users) {
           setUsers(res.data.users);
@@ -29,7 +29,7 @@ export default function UserList() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        await axios.delete(`https://posterbnaobackend.onrender.com/api/admin/deleteuser/${id}`);
+        await axios.delete(`https://posterbackend.onrender.com/api/admin/deleteuser/${id}`);
         alert("User deleted successfully");
         setUsers(users.filter((user) => user.id !== id)); // Update UI
       } catch (error) {

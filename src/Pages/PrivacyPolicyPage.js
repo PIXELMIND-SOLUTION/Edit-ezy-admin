@@ -9,7 +9,7 @@ const PrivacyPolicyPage = () => {
   useEffect(() => {
     const fetchPrivacyPolicy = async () => {
       try {
-        const response = await axios.get("https://posterbnaobackend.onrender.com/api/admin/getpolicy");
+        const response = await axios.get("https://posterbackend.onrender.com/api/admin/getpolicy");
         setPrivacyPolicy(response.data);
       } catch (err) {
         console.error("Error fetching privacy policy:", err);

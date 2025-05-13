@@ -40,7 +40,7 @@ const CreateCategory = () => {
     }
 
     try {
-      await axios.post('https://posterbnaobackend.onrender.com/api/category/create-cateogry', formData, {
+      await axios.post('https://posterbackend.onrender.com/api/category/create-cateogry', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

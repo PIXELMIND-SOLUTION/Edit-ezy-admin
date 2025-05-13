@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 const CreateLogo = () => {
   const [logoName, setLogoName] = useState('');
@@ -19,43 +21,50 @@ const CreateLogo = () => {
     }
   };
 
-  // Handle form submission
+
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!logoName || !description || !price || !logoImage) {
-      setErrorMessage('All fields are required.');
-      return;
-    }
+  if (!logoName || !description || !price || !logoImage) {
+    setErrorMessage('All fields are required.');
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append('name', logoName);
-    formData.append('description', description);
-    formData.append('price', price);
-    formData.append('image', logoImage); // Must match multer field name
+  const formData = new FormData();
+  formData.append('name', logoName);
+  formData.append('description', description);
+  formData.append('price', price);
+  formData.append('image', logoImage);
 
-    try {
-      const response = await axios.post(
-        'https://posterbnaobackend.onrender.com/api/admin/createlogo',
-        formData,
-        {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }
-      );
+  try {
+    const response = await axios.post(
+      'https://posterbackend.onrender.com/api/admin/createlogo',
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    );
 
-      setSuccessMessage('Logo created successfully!');
-      setLogoName('');
-      setDescription('');
-      setPrice('');
-      setLogoImage(null);
-      setPreviewImage(null);
-      setErrorMessage('');
-    } catch (error) {
-      setErrorMessage('Error creating logo. Please try again.');
-      console.error(error);
-    }
-  };
+    setSuccessMessage('Logo created successfully!');
+    setLogoName('');
+    setDescription('');
+    setPrice('');
+    setLogoImage(null);
+    setPreviewImage(null);
+    setErrorMessage('');
 
+    // ✅ Redirect after short delay
+    setTimeout(() => {
+      navigate('/logolist');
+    }, 1500);
+
+  } catch (error) {
+    setErrorMessage('Error creating logo. Please try again.');
+    console.error(error);
+  }
+};
   return (
     <div className="container p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
       <h2 className="text-xl font-semibold mb-6 text-center text-blue-900">Create Logo</h2>

@@ -13,7 +13,7 @@ const AcceptedAppointmentsList = () => {
 
   const fetchAcceptedAppointments = async () => {
     try {
-      const res = await axios.get("https://credenhealth.onrender.com/api/admin/acceptedappointments");
+      const res = await axios.get("http://localhost:4000/api/admin/acceptedappointments");
       if (res.data && res.data.appointments) {
         setAppointments(res.data.appointments);
       }

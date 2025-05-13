@@ -44,7 +44,7 @@ const CreateBusinessCard = () => {
     });
 
     try {
-      const response = await axios.post('https://posterbnaobackend.onrender.com/api/admin/createbusinesscard', formData);
+      const response = await axios.post('https://posterbackend.onrender.com/api/admin/createbusinesscard', formData);
       console.log('Business Card Created:', response.data);
       navigate('/businesscardlist'); // ✅ Redirect on success
     } catch (error) {

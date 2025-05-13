@@ -18,7 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const res = await axios.get("https://posterbnaobackend.onrender.com/api/admin/dashboard");
+        const res = await axios.get("https://posterbackend.onrender.com/api/admin/dashboard");
         setDashboardData(res.data);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);

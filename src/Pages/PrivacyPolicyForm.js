@@ -17,7 +17,7 @@ const PrivacyPolicyForm = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("https://posterbnaobackend.onrender.com/api/admin/privacy-policy", {
+      const response = await axios.post("https://posterbackend.onrender.com/api/admin/privacy-policy", {
         title: policyTitle,
         content: policyContent,
         date,

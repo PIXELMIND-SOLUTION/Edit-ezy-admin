@@ -9,7 +9,7 @@ const GetContactUsPage = () => {
   useEffect(() => {
     const fetchContactUsData = async () => {
       try {
-        const response = await axios.get("https://posterbnaobackend.onrender.com/api/admin/getcontactus");
+        const response = await axios.get("https://posterbackend.onrender.com/api/admin/getcontactus");
         setContactUsData(response.data); // Expecting array
       } catch (err) {
         console.error("Error fetching contact messages:", err);

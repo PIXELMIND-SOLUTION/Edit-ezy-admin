@@ -14,7 +14,7 @@ const OrdersList = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          "https://posterbnaobackend.onrender.com/api/users/allorders"
+          "https://posterbackend.onrender.com/api/users/allorders"
         );
         if (response.data && response.data.orders) {
           setOrdersData(response.data.orders);
@@ -43,7 +43,7 @@ const OrdersList = () => {
     if (selectedOrder) {
       try {
         await axios.put(
-          `https://posterbnaobackend.onrender.com/api/users/orderstatus/${selectedOrder._id}`,
+          `https://posterbackend.onrender.com/api/users/orderstatus/${selectedOrder._id}`,
           { status: newStatus }
         );
 
@@ -66,7 +66,7 @@ const OrdersList = () => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       try {
         await axios.delete(
-          `https://posterbnaobackend.onrender.com/api/users/order/${orderId}`
+          `https://posterbackend.onrender.com/api/users/order/${orderId}`
         );
         setOrdersData(ordersData.filter((order) => order._id !== orderId));
         alert("Order deleted successfully.");

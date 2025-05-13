@@ -16,7 +16,7 @@ const PlanList = () => {
 
   const fetchPlans = async () => {
     try {
-      const response = await axios.get("https://posterbnaobackend.onrender.com/api/plans/getallplan");
+      const response = await axios.get("https://posterbackend.onrender.com/api/plans/getallplan");
       setPlans(response.data.plans || []);
     } catch (error) {
       console.error("Error fetching plans:", error);
@@ -39,7 +39,7 @@ const PlanList = () => {
   const handleModalSubmit = async () => {
     try {
       // Add API call to update the plan
-      await axios.put(`https://posterbnaobackend.onrender.com/api/plans/update/${selectedPlan._id}`, selectedPlan);
+      await axios.put(`https://posterbackend.onrender.com/api/plans/update/${selectedPlan._id}`, selectedPlan);
       setIsModalOpen(false);
       fetchPlans();
       alert("Plan updated successfully.");
@@ -51,7 +51,7 @@ const PlanList = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this plan?")) {
       try {
-        await axios.delete(`https://posterbnaobackend.onrender.com/api/plans/delete/${id}`);
+        await axios.delete(`https://posterbackend.onrender.com/api/plans/delete/${id}`);
         setPlans(plans.filter((plan) => plan._id !== id));
         alert("Plan deleted successfully.");
       } catch (error) {

@@ -19,7 +19,7 @@ const CreatePoster = () => {
   // Fetch categories
   useEffect(() => {
     axios
-      .get('https://posterbnaobackend.onrender.com/api/category/getall-cateogry')
+      .get('https://posterbackend.onrender.com/api/category/getall-cateogry')
       .then((response) => {
         if (response.data.success) {
           setCategories(response.data.categories);
@@ -64,7 +64,7 @@ const CreatePoster = () => {
 
     try {
       const response = await axios.post(
-        'https://posterbnaobackend.onrender.com/api/poster/create-poster',
+        'https://posterbackend.onrender.com/api/poster/create-poster',
         formData,
         {
           headers: {

@@ -42,7 +42,7 @@ const CreatePlan = () => {
     };
 
     try {
-      const response = await axios.post("https://posterbnaobackend.onrender.com/api/plans/create-plan", data);
+      const response = await axios.post("https://posterbackend.onrender.com/api/plans/create-plan", data);
       alert("Plan created successfully!");
       console.log("Response:", response.data);
 
