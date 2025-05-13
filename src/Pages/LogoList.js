@@ -95,7 +95,7 @@ const LogoList = () => {
                 <td className="p-2 border">{index + 1 + indexOfFirstLogo}</td>
                 <td className="p-2 border">
                   <img
-                    src={`https://posterbackend.onrender.com${logo.image}`}
+                    src={logo.image}
                     alt={logo.name}
                     className="w-12 h-12 object-cover rounded"
                   />

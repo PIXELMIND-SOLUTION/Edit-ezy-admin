@@ -155,7 +155,7 @@ const BusinessCardList = () => {
                     {card.images?.slice(0, 2).map((img, i) => (
                       <img
                         key={i}
-                        src={`https://posterbackend.onrender.com${img}`}
+                        src={img}
                         alt="img"
                         className="w-10 h-10 object-cover rounded"
                         onError={(e) => (e.target.src = "/default-image.jpg")}

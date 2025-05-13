@@ -173,11 +173,12 @@ export default function PosterList() {
                     {poster.images.slice(0, 3).map((image, idx) => (
                       <img
                         key={idx}
-                        src={`https://posterbackend.onrender.com${image}`}  // Prepend the server URL to the image path
+                        src={image}  // Use Cloudinary or full URL directly
                         alt={`poster-image-${idx}`}
                         className="w-12 h-12 object-cover rounded"
-                        onError={(e) => (e.target.src = "/default-image.jpg")} // Fallback image if error occurs
+                        onError={(e) => (e.target.src = "/default-image.jpg")} // Local fallback image
                       />
+
                     ))}
                   </div>
                 </td>
