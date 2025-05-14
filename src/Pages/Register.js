@@ -35,7 +35,7 @@ const RegisterPage = () => {
 
       if (response.ok) {
         // Registration successful, redirect to login page
-        navigate('/login');
+        navigate('/');
       } else {
         setError(data.error || 'Registration failed');
       }
