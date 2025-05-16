@@ -122,10 +122,10 @@ const BusinessCardList = () => {
         />
         <div className="flex gap-2">
           <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("csv")}>
-            Export CSV
+            CSV
           </button>
           <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("xlsx")}>
-            Export Excel
+            Excel
           </button>
         </div>
       </div>
