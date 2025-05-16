@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { utils, writeFile } from "xlsx";
+import { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { utils, writeFile } from "xlsx";
+import axios from "axios";
 
 const BusinessCardList = () => {
   const [cards, setCards] = useState([]);
@@ -111,6 +111,15 @@ const BusinessCardList = () => {
     <div className="p-4 border rounded-lg shadow-lg bg-white">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-blue-900">Business Cards</h2>
+      </div>
+
+      <div className="flex justify-between mb-4">
+        <input
+          className="w-1/3 p-2 border rounded"
+          placeholder="Search by name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
         <div className="flex gap-2">
           <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("csv")}>
             Export CSV
@@ -121,20 +130,11 @@ const BusinessCardList = () => {
         </div>
       </div>
 
-      <div className="mb-4">
-        <input
-          className="w-full p-2 border rounded"
-          placeholder="Search by name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300 text-sm">
+      <div className="overflow-x-auto mb-4">
+        <table className="w-full border-collapse border border-gray-300">
           <thead>
-            <tr className="bg-blue-800 text-white">
-              <th className="p-2 border">#</th>
+            <tr className="bg-purple-600 text-white">
+              <th className="p-2 border">Sl</th>
               <th className="p-2 border">Images</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Category</th>
@@ -185,27 +185,19 @@ const BusinessCardList = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center mt-4 gap-2">
+      <div className="flex justify-between mt-4">
         <button
-          className="px-3 py-1 bg-gray-200 rounded"
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage((p) => p - 1)}
+          onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+          className="bg-blue-500 text-white p-2 rounded"
         >
-          Prev
+          Previous
         </button>
-        {[...Array(totalPages)].map((_, i) => (
-          <button
-            key={i}
-            className={`px-3 py-1 rounded ${currentPage === i + 1 ? "bg-blue-500 text-white" : "bg-gray-100"}`}
-            onClick={() => setCurrentPage(i + 1)}
-          >
-            {i + 1}
-          </button>
-        ))}
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
-          className="px-3 py-1 bg-gray-200 rounded"
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage((p) => p + 1)}
+          onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+          className="bg-blue-500 text-white p-2 rounded"
         >
           Next
         </button>
@@ -213,9 +205,9 @@ const BusinessCardList = () => {
 
       {/* Edit Modal */}
       {modalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded w-[400px]">
-            <h3 className="text-lg font-semibold mb-4">Edit Business Card</h3>
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg w-1/3">
+            <h3 className="text-xl font-semibold mb-4">Edit Business Card</h3>
             <div className="grid grid-cols-1 gap-3">
               {["name", "category", "price", "offerPrice", "description", "size"].map((field) => (
                 <input

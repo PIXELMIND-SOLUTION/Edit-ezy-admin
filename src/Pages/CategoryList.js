@@ -15,9 +15,9 @@ export default function CategoryList() {
   const categoriesPerPage = 5;
 
   useEffect(() => {
-    // Use the local server URL here
+    // Fetch categories from the server
     axios
-      .get("https://posterbackend.onrender.com/api/category/getall-cateogry")  // Changed URL to localhost
+      .get("https://posterbackend.onrender.com/api/category/getall-cateogry")  // API endpoint
       .then((res) => {
         if (res.data && res.data.categories) {
           setCategories(res.data.categories);
@@ -66,28 +66,36 @@ export default function CategoryList() {
       image: categoryImage,
     };
 
-    // Update API call to localhost
+    // Update category API call
     axios
-      .put(`https://posterbackend.onrender.com/api/category/update/${selectedCategory._id}`, updatedCategory)  // Changed URL to localhost
+      .put(`https://posterbackend.onrender.com/api/category/update/${selectedCategory._id}`, updatedCategory)
       .then(() => {
         setCategories(categories.map((cat) => (cat._id === selectedCategory._id ? updatedCategory : cat)));
         setModalOpen(false);
         resetModalState();
+        alert("Category updated successfully!");  // Alert for successful update
       })
       .catch((error) => {
         console.error("Error updating category:", error);
+        alert("Error updating category. Please try again.");  // Alert for error
       });
   };
 
   const handleDelete = (id) => {
-    // Delete API call to localhost
+    // Confirm deletion using an alert
+    const confirmDelete = window.confirm("Are you sure you want to delete this category?");
+    if (!confirmDelete) return;
+
+    // Delete category API call
     axios
-      .delete(`https://posterbackend.onrender.com/api/category/delete/${id}`)  // Changed URL to localhost
+      .delete(`https://posterbackend.onrender.com/api/category/delete/${id}`)
       .then(() => {
         setCategories(categories.filter((cat) => cat._id !== id));
+        alert("Category deleted successfully!");  // Alert for successful deletion
       })
       .catch((error) => {
         console.error("Error deleting category:", error);
+        alert("Error deleting category. Please try again.");  // Alert for error
       });
   };
 
@@ -145,7 +153,6 @@ export default function CategoryList() {
                     className="w-12 h-12 rounded object-cover"
                     onError={(e) => (e.target.src = "https://via.placeholder.com/50")}
                   />
-
                 </td>
                 <td className="p-2 border">{cat.categoryName || "N/A"}</td>
                 <td className="p-2 border">{cat.subCategoryName || "—"}</td>
@@ -172,33 +179,24 @@ export default function CategoryList() {
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center mt-4 gap-4">
+   {/* Pagination similar to PosterList */}
+      <div className="flex justify-between mt-4">
         <button
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+          className="bg-blue-500 text-white p-2 rounded"
         >
           Previous
         </button>
-        {[...Array(totalPages)].map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentPage(index + 1)}
-            className={`px-4 py-2 rounded ${currentPage === index + 1 ? "bg-blue-500 text-white" : "bg-gray-200"}`}
-          >
-            {index + 1}
-          </button>
-        ))}
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+          className="bg-blue-500 text-white p-2 rounded"
         >
           Next
         </button>
       </div>
-
       {/* Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">

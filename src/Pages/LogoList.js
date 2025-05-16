@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { utils, writeFile } from "xlsx";
 import axios from "axios";
 
 const LogoList = () => {
@@ -10,11 +11,10 @@ const LogoList = () => {
   const [editedLogoData, setEditedLogoData] = useState({});
   const logosPerPage = 5;
 
-  // ✅ Fetch all logos
   const fetchLogos = async () => {
     try {
       const res = await axios.get("https://posterbackend.onrender.com/api/admin/getlogos");
-      setLogos(res.data); // Direct array response
+      setLogos(res.data);
     } catch (error) {
       console.error("Failed to fetch logos", error);
     }
@@ -24,13 +24,26 @@ const LogoList = () => {
     fetchLogos();
   }, []);
 
+  const exportData = (type) => {
+    const exportItems = filteredLogos.map(({ _id, name, description, image }) => ({
+      ID: _id,
+      Name: name || "N/A",
+      Description: description || "N/A",
+      Image: image || "N/A",
+    }));
+    const ws = utils.json_to_sheet(exportItems);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Logos");
+    writeFile(wb, `logos.${type}`);
+  };
+
   const filteredLogos = logos.filter((logo) =>
-    logo.name.toLowerCase().includes(search.toLowerCase())
+    (logo.name || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  const indexOfLastLogo = currentPage * logosPerPage;
-  const indexOfFirstLogo = indexOfLastLogo - logosPerPage;
-  const currentLogos = filteredLogos.slice(indexOfFirstLogo, indexOfLastLogo);
+  const indexOfLast = currentPage * logosPerPage;
+  const indexOfFirst = indexOfLast - logosPerPage;
+  const currentLogos = filteredLogos.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filteredLogos.length / logosPerPage);
 
   const handleEdit = (logo) => {
@@ -38,19 +51,20 @@ const LogoList = () => {
     setModalOpen(true);
   };
 
-  // ✅ Delete API
   const handleDelete = async (id) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this logo?");
+    if (!confirmDelete) return;
+
     try {
       await axios.delete(`https://posterbackend.onrender.com/api/admin/deletelogo/${id}`);
       alert("Logo deleted successfully!");
-      fetchLogos(); // Refresh list
+      fetchLogos();
     } catch (error) {
       console.error("Delete failed", error);
       alert("Failed to delete logo.");
     }
   };
 
-  // ✅ Update API
   const handleSaveChanges = async () => {
     try {
       await axios.put(
@@ -59,7 +73,7 @@ const LogoList = () => {
       );
       alert("Logo updated successfully!");
       setModalOpen(false);
-      fetchLogos(); // Refresh list
+      fetchLogos();
     } catch (error) {
       console.error("Update failed", error);
       alert("Failed to update logo.");
@@ -69,13 +83,24 @@ const LogoList = () => {
   return (
     <div className="p-4 border rounded-lg shadow-lg bg-white">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-blue-900">Logo List</h2>
+        <h2 className="text-xl font-semibold text-blue-900">All Logos</h2>
+      </div>
+
+      <div className="flex justify-between mb-4">
         <input
           className="w-1/3 p-2 border rounded"
           placeholder="Search by logo name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
+        <div className="flex gap-2">
+          <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("csv")}>
+            CSV
+          </button>
+          <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("xlsx")}>
+            Excel
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto mb-4">
@@ -92,26 +117,27 @@ const LogoList = () => {
           <tbody>
             {currentLogos.map((logo, index) => (
               <tr key={logo._id} className="border-b">
-                <td className="p-2 border">{index + 1 + indexOfFirstLogo}</td>
+                <td className="p-2 border">{index + 1 + indexOfFirst}</td>
                 <td className="p-2 border">
                   <img
                     src={logo.image}
                     alt={logo.name}
-                    className="w-12 h-12 object-cover rounded"
+                    className="w-12 h-12 rounded object-cover"
+                    onError={(e) => (e.target.src = "https://via.placeholder.com/50")}
                   />
                 </td>
-                <td className="p-2 border">{logo.name}</td>
-                <td className="p-2 border">{logo.description}</td>
+                <td className="p-2 border">{logo.name || "N/A"}</td>
+                <td className="p-2 border">{logo.description || "—"}</td>
                 <td className="p-2 border flex gap-2">
                   <button
-                    className="bg-blue-500 text-white p-1 rounded"
                     onClick={() => handleEdit(logo)}
+                    className="bg-blue-500 text-white p-1 rounded"
                   >
                     <FaEdit />
                   </button>
                   <button
-                    className="bg-red-500 text-white p-1 rounded"
                     onClick={() => handleDelete(logo._id)}
+                    className="bg-red-500 text-white p-1 rounded"
                   >
                     <FaTrash />
                   </button>
@@ -123,97 +149,68 @@ const LogoList = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center mt-4 gap-4">
+      <div className="flex justify-between mt-4">
         <button
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+          className="bg-blue-500 text-white p-2 rounded"
         >
           Previous
         </button>
-        {[...Array(totalPages)].map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentPage(index + 1)}
-            className={`px-4 py-2 rounded ${
-              currentPage === index + 1
-                ? "bg-blue-500 text-white"
-                : "bg-gray-200"
-            }`}
-          >
-            {index + 1}
-          </button>
-        ))}
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+          className="bg-blue-500 text-white p-2 rounded"
         >
           Next
         </button>
       </div>
 
-      {/* Edit Modal */}
+      {/* Modal */}
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded-lg w-1/3">
             <h3 className="text-xl font-semibold mb-4">Edit Logo</h3>
-
-            <div className="mb-4">
+            <div>
               <label className="block mb-2">Logo Name</label>
               <input
                 type="text"
                 value={editedLogoData.name}
-                onChange={(e) =>
-                  setEditedLogoData({
-                    ...editedLogoData,
-                    name: e.target.value,
-                  })
-                }
-                className="w-full p-2 border rounded"
+                onChange={(e) => setEditedLogoData({ ...editedLogoData, name: e.target.value })}
+                className="w-full p-2 border rounded mb-4"
               />
             </div>
-
-            <div className="mb-4">
+            <div>
               <label className="block mb-2">Description</label>
               <input
                 type="text"
                 value={editedLogoData.description}
                 onChange={(e) =>
-                  setEditedLogoData({
-                    ...editedLogoData,
-                    description: e.target.value,
-                  })
+                  setEditedLogoData({ ...editedLogoData, description: e.target.value })
                 }
-                className="w-full p-2 border rounded"
+                className="w-full p-2 border rounded mb-4"
               />
             </div>
-
-            <div className="mb-4">
+            <div>
               <label className="block mb-2">Logo Image URL</label>
               <input
                 type="text"
                 value={editedLogoData.image}
-                onChange={(e) =>
-                  setEditedLogoData({
-                    ...editedLogoData,
-                    image: e.target.value,
-                  })
-                }
-                className="w-full p-2 border rounded"
+                onChange={(e) => setEditedLogoData({ ...editedLogoData, image: e.target.value })}
+                className="w-full p-2 border rounded mb-4"
               />
             </div>
-
             <div className="flex justify-between">
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded"
                 onClick={() => setModalOpen(false)}
+                className="bg-gray-500 text-white px-4 py-2 rounded"
               >
                 Cancel
               </button>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded"
                 onClick={handleSaveChanges}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
               >
                 Save Changes
               </button>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { utils, writeFile } from "xlsx";  // Importing for Excel/CSV export
 
 const OrdersList = () => {
   const [ordersData, setOrdersData] = useState([]);
@@ -9,6 +10,9 @@ const OrdersList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newStatus, setNewStatus] = useState("");
+  const [search, setSearch] = useState(""); // State for search query
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 5;
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -16,8 +20,11 @@ const OrdersList = () => {
         const response = await axios.get(
           "https://posterbackend.onrender.com/api/users/allorders"
         );
+        console.log("API Response:", response.data); // Log the response to check the structure
         if (response.data && response.data.orders) {
           setOrdersData(response.data.orders);
+        } else {
+          setError("No orders data found.");
         }
       } catch (err) {
         setError("Error fetching orders.");
@@ -28,6 +35,10 @@ const OrdersList = () => {
 
     fetchOrders();
   }, []);
+
+  useEffect(() => {
+    console.log("Orders Data:", ordersData);  // Log the ordersData to check if it's being set correctly
+  }, [ordersData]);
 
   const handleEdit = (order) => {
     setSelectedOrder(order);
@@ -76,20 +87,69 @@ const OrdersList = () => {
     }
   };
 
+  const indexOfLast = currentPage * ordersPerPage;
+  const indexOfFirst = indexOfLast - ordersPerPage;
+  const currentOrders = ordersData.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(ordersData.length / ordersPerPage);
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
+  const filteredOrders = ordersData.filter((order) =>
+    order.user?.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  console.log("Filtered Orders:", filteredOrders);  // Log filteredOrders to check if filtering works correctly
+
+  // Export CSV or Excel
+  const exportData = (type) => {
+    const exportItems = filteredOrders.map(({ _id, user, poster, totalAmount, status, orderDate }) => ({
+      ID: _id,
+      UserName: user?.name || "N/A",
+      Poster: poster?.name || "N/A",
+      TotalAmount: totalAmount || "N/A",
+      Status: status || "N/A",
+      OrderDate: new Date(orderDate).toLocaleString(),
+    }));
+
+    const ws = utils.json_to_sheet(exportItems);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Orders");
+    writeFile(wb, `orders.${type}`);
+  };
+
   return (
-    <div className="p-6 max-w-6xl mx-auto bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-semibold text-blue-900 mb-6">User Orders</h2>
+    <div className="p-4 border rounded-lg shadow-lg bg-white">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold text-blue-900 mb-6">User Orders</h2>
+
+       <div className="flex items-center justify-between mb-4 w-full">
+  <div className="flex-1">
+    <input
+      className="w-full max-w-xs p-2 border rounded"
+      placeholder="Search by user name..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+    />
+  </div>
+  <div className="flex gap-2">
+    <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("csv")}>
+      CSV
+    </button>
+    <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("xlsx")}>
+      Excel
+    </button>
+  </div>
+</div>
+</div>
 
       {ordersData.length === 0 ? (
         <p>No orders found.</p>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mb-4">
           <table className="w-full border-collapse border border-gray-300">
-            <thead className="bg-purple-600 text-white">
-              <tr>
+            <thead>
+              <tr className="bg-purple-600 text-white">
                 <th className="p-2 border">Sl</th>
                 <th className="p-2 border">User Name</th>
                 <th className="p-2 border">User Email</th>
@@ -102,18 +162,16 @@ const OrdersList = () => {
               </tr>
             </thead>
             <tbody>
-              {ordersData.map((order, index) => (
+              {currentOrders.map((order, index) => (
                 <tr key={order._id} className="border-b hover:bg-gray-50">
-                  <td className="p-2 border">{index + 1}</td>
+                  <td className="p-2 border">{index + 1 + indexOfFirst}</td>
                   <td className="p-2 border">{order.user?.name || "N/A"}</td>
                   <td className="p-2 border">{order.user?.email || "N/A"}</td>
                   <td className="p-2 border">
                     {order.paymentMethod || order.paymentDetails?.method || "N/A"}
                   </td>
                   <td className="p-2 border">
-                    {order.poster?.name ||
-                      order.businessPoster?.name ||
-                      "N/A"}
+                    {order.poster?.name || order.businessPoster?.name || "N/A"}
                   </td>
                   <td className="p-2 border">₹{order.totalAmount || 0}</td>
                   <td className="p-2 border">{order.status}</td>
@@ -123,13 +181,13 @@ const OrdersList = () => {
                   <td className="p-2 border text-center">
                     <div className="flex justify-center gap-2">
                       <button
-                        className="text-blue-600 hover:text-blue-800"
+                        className="bg-blue-500 text-white p-1 rounded"
                         onClick={() => handleEdit(order)}
                       >
                         <FaEdit />
                       </button>
                       <button
-                        className="text-red-600 hover:text-red-800"
+                        className="bg-red-500 text-white p-1 rounded"
                         onClick={() => handleDelete(order._id)}
                       >
                         <FaTrash />
@@ -142,6 +200,25 @@ const OrdersList = () => {
           </table>
         </div>
       )}
+
+      {/* Pagination */}
+      <div className="flex justify-between mt-4">
+        <button
+          onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+          className="bg-blue-500 text-white p-2 rounded"
+        >
+          Previous
+        </button>
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+          className="bg-blue-500 text-white p-2 rounded"
+        >
+          Next
+        </button>
+      </div>
 
       {/* Modal for Editing Status */}
       {isModalOpen && (

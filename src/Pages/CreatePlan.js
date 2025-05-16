@@ -10,6 +10,7 @@ const CreatePlan = () => {
   const [featureInput, setFeatureInput] = useState("");
   const [features, setFeatures] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state to handle multiple clicks
 
   const handleAddFeature = () => {
     if (featureInput.trim() !== "") {
@@ -31,6 +32,8 @@ const CreatePlan = () => {
       setErrorMessage("Please fill in all fields and add at least one feature.");
       return;
     }
+
+    setLoading(true); // Set loading state to true when submitting
 
     const data = {
       name,
@@ -57,6 +60,8 @@ const CreatePlan = () => {
     } catch (error) {
       console.error("Error creating plan:", error);
       setErrorMessage("Failed to create plan. Please try again.");
+    } finally {
+      setLoading(false); // Reset loading state after the request is complete
     }
   };
 
@@ -146,8 +151,9 @@ const CreatePlan = () => {
         <button
           type="submit"
           className="w-full bg-blue-900 text-white p-3 rounded hover:bg-blue-800 transition"
+          disabled={loading} // Disable button while loading
         >
-          Create Plan
+          {loading ? "Creating..." : "Create Plan"} {/* Show loading text while submitting */}
         </button>
       </form>
     </div>

@@ -81,19 +81,27 @@ export default function PosterList() {
   const handleSaveChanges = () => {
     // Create FormData to send images as well as other fields
     const formData = new FormData();
-    formData.append("name", editedPosterData.name);
-    formData.append("categoryName", editedPosterData.categoryName);
-    formData.append("price", editedPosterData.price);
-    formData.append("description", editedPosterData.description);
-    formData.append("size", editedPosterData.size);
-    formData.append("festivalDate", editedPosterData.festivalDate);
-    formData.append("inStock", editedPosterData.inStock);
+    
+    // Append only the fields that have been edited
+    if (editedPosterData.name !== selectedPoster.name) formData.append("name", editedPosterData.name);
+    if (editedPosterData.categoryName !== selectedPoster.categoryName) formData.append("categoryName", editedPosterData.categoryName);
+    if (editedPosterData.price !== selectedPoster.price) formData.append("price", editedPosterData.price);
+    if (editedPosterData.description !== selectedPoster.description) formData.append("description", editedPosterData.description);
+    if (editedPosterData.size !== selectedPoster.size) formData.append("size", editedPosterData.size);
+    if (editedPosterData.festivalDate !== selectedPoster.festivalDate) formData.append("festivalDate", editedPosterData.festivalDate);
+    if (editedPosterData.inStock !== selectedPoster.inStock) formData.append("inStock", editedPosterData.inStock);
 
     // Loop through any new images if selected
     if (selectedImages) {
       selectedImages.forEach((image) => {
         formData.append("images", image);
       });
+    }
+
+    // If no fields have changed, prevent submission
+    if (formData.entries().next().done) {
+      alert("No changes made.");
+      return;
     }
 
     axios
@@ -103,13 +111,22 @@ export default function PosterList() {
         { headers: { "Content-Type": "multipart/form-data" } }
       )
       .then((res) => {
+        // Show success alert
         alert("Poster updated successfully!");
-        setPosters(posters.map((poster) => (poster._id === selectedPoster._id ? { ...poster, ...editedPosterData } : poster)));
-        setModalOpen(false); // Close the modal
-        setSelectedPoster(null);
+
+        // Update the poster in the list with only the changed data
+        setPosters(posters.map((poster) => 
+          poster._id === selectedPoster._id ? { ...poster, ...editedPosterData } : poster
+        ));
+
+        // Close the modal
+        setModalOpen(false);
+        setSelectedPoster(null); // Reset selected poster
       })
       .catch((error) => {
         console.error("Error updating poster:", error);
+        // Show error alert
+        alert("Error updating the poster. Please try again.");
       });
   };
 
@@ -173,12 +190,11 @@ export default function PosterList() {
                     {poster.images.slice(0, 3).map((image, idx) => (
                       <img
                         key={idx}
-                        src={image}  // Use Cloudinary or full URL directly
+                        src={image} // Use Cloudinary or full URL directly
                         alt={`poster-image-${idx}`}
                         className="w-12 h-12 object-cover rounded"
                         onError={(e) => (e.target.src = "/default-image.jpg")} // Local fallback image
                       />
-
                     ))}
                   </div>
                 </td>

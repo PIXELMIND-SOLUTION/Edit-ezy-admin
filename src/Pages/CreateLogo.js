@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-
 const CreateLogo = () => {
   const [logoName, setLogoName] = useState('');
   const [description, setDescription] = useState('');
@@ -11,65 +10,67 @@ const CreateLogo = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [loading, setLoading] = useState(false); // ✅ New loading state
 
-  // Handle image selection
+  const navigate = useNavigate();
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setLogoImage(file);
-      setPreviewImage(URL.createObjectURL(file)); // For preview
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
 
-
-  const navigate = useNavigate();
-
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!logoName || !description || !price || !logoImage) {
-    setErrorMessage('All fields are required.');
-    return;
-  }
+    if (!logoName || !description || !price || !logoImage) {
+      setErrorMessage('All fields are required.');
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append('name', logoName);
-  formData.append('description', description);
-  formData.append('price', price);
-  formData.append('image', logoImage);
-
-  try {
-    const response = await axios.post(
-      'https://posterbackend.onrender.com/api/admin/createlogo',
-      formData,
-      {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }
-    );
-
-    setSuccessMessage('Logo created successfully!');
-    setLogoName('');
-    setDescription('');
-    setPrice('');
-    setLogoImage(null);
-    setPreviewImage(null);
+    setLoading(true); // ✅ Start loading
     setErrorMessage('');
+    setSuccessMessage('');
 
-    // ✅ Redirect after short delay
-    setTimeout(() => {
-      navigate('/logolist');
-    }, 1500);
+    const formData = new FormData();
+    formData.append('name', logoName);
+    formData.append('description', description);
+    formData.append('price', price);
+    formData.append('image', logoImage);
 
-  } catch (error) {
-    setErrorMessage('Error creating logo. Please try again.');
-    console.error(error);
-  }
-};
+    try {
+      await axios.post(
+        'https://posterbackend.onrender.com/api/admin/createlogo',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
+
+      setSuccessMessage('Logo created successfully!');
+      setLogoName('');
+      setDescription('');
+      setPrice('');
+      setLogoImage(null);
+      setPreviewImage(null);
+
+      setTimeout(() => {
+        navigate('/logolist');
+      }, 1500);
+    } catch (error) {
+      setErrorMessage('Error creating logo. Please try again.');
+      console.error(error);
+    } finally {
+      setLoading(false); // ✅ End loading
+    }
+  };
+
   return (
     <div className="container p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
       <h2 className="text-xl font-semibold mb-6 text-center text-blue-900">Create Logo</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
-
         <div>
           <label className="block text-lg font-medium mb-2">Logo Name</label>
           <input
@@ -126,9 +127,14 @@ const CreateLogo = () => {
         <div className="text-center">
           <button
             type="submit"
-            className="bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition"
+            disabled={loading} // ✅ Disable when loading
+            className={`px-6 py-3 rounded-lg transition ${
+              loading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-900 text-white hover:bg-blue-800'
+            }`}
           >
-            Create Logo
+            {loading ? 'Creating...' : 'Create Logo'}
           </button>
         </div>
       </form>

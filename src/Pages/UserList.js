@@ -31,7 +31,7 @@ export default function UserList() {
       try {
         await axios.delete(`https://posterbackend.onrender.com/api/admin/deleteuser/${id}`);
         alert("User deleted successfully");
-        setUsers(users.filter((user) => user.id !== id)); // Update UI
+        setUsers(users.filter((user) => user.id !== id));
       } catch (error) {
         console.error("Error deleting user:", error);
         alert("Failed to delete user");
@@ -52,10 +52,9 @@ export default function UserList() {
     writeFile(wb, `users.${type}`);
   };
 
-  const filteredUsers = users.filter((user) => {
-    const userName = user.name || "";
-    return userName.toLowerCase().includes(search.toLowerCase());
-  });
+  const filteredUsers = users.filter((user) =>
+    (user.name || "").toLowerCase().includes(search.toLowerCase())
+  );
 
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
@@ -76,8 +75,12 @@ export default function UserList() {
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className="flex gap-2">
-          <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("csv")}>CSV</button>
-          <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("xlsx")}>Excel</button>
+          <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("csv")}>
+            CSV
+          </button>
+          <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("xlsx")}>
+            Excel
+          </button>
         </div>
       </div>
 
@@ -113,27 +116,20 @@ export default function UserList() {
         </table>
       </div>
 
-      <div className="flex justify-center mt-4 gap-4">
+      {/* Pagination similar to PosterList */}
+      <div className="flex justify-between mt-4">
         <button
-          onClick={() => setCurrentPage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+          className="bg-blue-500 text-white p-2 rounded"
         >
           Previous
         </button>
-        {[...Array(totalPages)].map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentPage(index + 1)}
-            className={`px-4 py-2 rounded ${currentPage === index + 1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
-          >
-            {index + 1}
-          </button>
-        ))}
+        <span>
+          Page {currentPage} of {totalPages}
+        </span>
         <button
-          onClick={() => setCurrentPage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="bg-gray-300 px-4 py-2 rounded"
+          onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+          className="bg-blue-500 text-white p-2 rounded"
         >
           Next
         </button>

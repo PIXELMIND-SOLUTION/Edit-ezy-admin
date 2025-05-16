@@ -14,6 +14,7 @@ const CreatePoster = () => {
   const [inStock, setInStock] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [categories, setCategories] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission status
   const navigate = useNavigate();
 
   // Fetch categories
@@ -42,11 +43,16 @@ const CreatePoster = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // If already submitting, prevent multiple submissions
+    if (isSubmitting) return;
+
     // Validation check
     if (!name || !categoryName || !price || (!imageFiles.length && !festivalDate) || !description || !size) {
       setErrorMessage('Please fill all required fields.');
       return;
     }
+
+    setIsSubmitting(true); // Set isSubmitting to true when submitting the form
 
     const formData = new FormData();
     formData.append('name', name);
@@ -89,7 +95,9 @@ const CreatePoster = () => {
       setErrorMessage('');
     } catch (error) {
       console.error('Error creating poster:', error);
-      setErrorMessage('Error creating poster. Please try again.');
+      setErrorMessage('Error creating poster. Please try again.');  // Alert for error
+    } finally {
+      setIsSubmitting(false); // Reset isSubmitting back to false after submission completes
     }
   };
 
@@ -219,8 +227,9 @@ const CreatePoster = () => {
           <button
             type="submit"
             className="bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition duration-300"
+            disabled={isSubmitting}  // Disable submit button if isSubmitting is true
           >
-            Create Poster
+            {isSubmitting ? 'Creating Poster...' : 'Create Poster'}
           </button>
         </div>
       </form>

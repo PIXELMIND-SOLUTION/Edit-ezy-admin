@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // ✅ Import navigate
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { FaUpload } from 'react-icons/fa';
 
 const CreateCategory = () => {
-  const navigate = useNavigate(); // ✅ Initialize navigate
+  const navigate = useNavigate();
 
   const [categoryName, setCategoryName] = useState('');
   const [subCategory, setSubCategory] = useState('');
@@ -12,6 +12,7 @@ const CreateCategory = () => {
   const [previewImage, setPreviewImage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // 🚫 Prevent double submit
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -24,35 +25,45 @@ const CreateCategory = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    setErrorMessage('');
-    setSuccessMessage('');
-
-    if (!categoryName || !image) {
-      setErrorMessage('Category name and image are required.');
+    if (isSubmitting) {
+      alert('Form is already being submitted. Please wait...');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('categoryName', categoryName);
-    formData.append('image', image);
-    if (subCategory.trim()) {
-      formData.append('subCategoryName', subCategory);
+    setErrorMessage('');
+    setSuccessMessage('');
+
+    if (!categoryName || !subCategory || !image) {
+      setErrorMessage('All fields including subcategory and image are required.');
+      return;
     }
 
+    setIsSubmitting(true); // 🔒 Lock submit
+
+    const formData = new FormData();
+    formData.append('categoryName', categoryName.trim());
+    formData.append('subCategoryName', subCategory.trim());
+    formData.append('image', image);
+
     try {
-      await axios.post('https://posterbackend.onrender.com/api/category/create-cateogry', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await axios.post(
+        'https://posterbackend.onrender.com/api/category/create-cateogry',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
+      );
 
       setSuccessMessage('Category created successfully!');
       setTimeout(() => {
-        navigate('/categorylist'); // ✅ Navigate after success
-      }, 1000);
+        navigate('/categorylist');
+      }, 1500);
     } catch (err) {
       console.error('Error creating category:', err);
-      setErrorMessage('Error creating category. Please try again.');
+      const msg = err.response?.data?.message || 'Something went wrong. Please try again.';
+      setErrorMessage(msg);
+    } finally {
+      setIsSubmitting(false); // 🔓 Unlock submit after response
     }
   };
 
@@ -73,13 +84,13 @@ const CreateCategory = () => {
         </div>
 
         <div>
-          <label className="block text-lg font-medium mb-2">Subcategory (Optional)</label>
+          <label className="block text-lg font-medium mb-2">Subcategory</label>
           <input
             type="text"
             className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={subCategory}
             onChange={(e) => setSubCategory(e.target.value)}
-            placeholder="Enter subcategory name (optional)"
+            placeholder="Enter subcategory name"
           />
         </div>
 
@@ -95,7 +106,7 @@ const CreateCategory = () => {
 
           <label
             htmlFor="fileInput"
-            className="cursor-pointer p-2 text-sm bg-blue-900 text-white rounded-md flex items-center justify-start"
+            className="cursor-pointer p-2 text-sm bg-blue-900 text-white rounded-md flex items-center justify-start w-fit"
           >
             <FaUpload className="mr-2 text-sm" /> Upload Image
           </label>
@@ -105,7 +116,7 @@ const CreateCategory = () => {
               <img
                 src={previewImage}
                 alt="Preview"
-                className="w-24 h-24 object-cover rounded-md"
+                className="w-24 h-24 object-cover rounded-md border"
               />
             </div>
           )}
@@ -122,9 +133,14 @@ const CreateCategory = () => {
         <div className="text-center">
           <button
             type="submit"
-            className="bg-blue-900 text-white p-3 rounded-lg shadow-md hover:bg-blue-800 transition duration-300"
+            disabled={isSubmitting}
+            className={`p-3 rounded-lg shadow-md transition duration-300 ${
+              isSubmitting
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-900 text-white hover:bg-blue-800'
+            }`}
           >
-            Create Category
+            {isSubmitting ? 'Creating...' : 'Create Category'}
           </button>
         </div>
       </form>
