@@ -17,7 +17,7 @@ export default function CategoryList() {
   useEffect(() => {
     // Fetch categories from the server
     axios
-      .get("https://posterbackend.onrender.com/api/category/getall-cateogry")  // API endpoint
+      .get("http://194.164.148.244:4061/api/category/getall-cateogry")  // API endpoint
       .then((res) => {
         if (res.data && res.data.categories) {
           setCategories(res.data.categories);
@@ -68,7 +68,7 @@ export default function CategoryList() {
 
     // Update category API call
     axios
-      .put(`https://posterbackend.onrender.com/api/category/update/${selectedCategory._id}`, updatedCategory)
+      .put(`http://194.164.148.244:4061/api/category/update/${selectedCategory._id}`, updatedCategory)
       .then(() => {
         setCategories(categories.map((cat) => (cat._id === selectedCategory._id ? updatedCategory : cat)));
         setModalOpen(false);
@@ -88,7 +88,7 @@ export default function CategoryList() {
 
     // Delete category API call
     axios
-      .delete(`https://posterbackend.onrender.com/api/category/delete/${id}`)
+      .delete(`http://194.164.148.244:4061/api/category/delete/${id}`)
       .then(() => {
         setCategories(categories.filter((cat) => cat._id !== id));
         alert("Category deleted successfully!");  // Alert for successful deletion

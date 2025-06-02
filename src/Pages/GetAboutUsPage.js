@@ -8,7 +8,7 @@ const GetAboutUsPage = () => {
   useEffect(() => {
     const fetchAboutUsData = async () => {
       try {
-        const response = await fetch("https://posterbackend.onrender.com/api/admin/getaboutus");
+        const response = await fetch("http://194.164.148.244:4061/api/admin/getaboutus");
         const data = await response.json();
 
         if (response.ok) {

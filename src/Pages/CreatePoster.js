@@ -6,21 +6,27 @@ const CreatePoster = () => {
   const [name, setName] = useState('');
   const [categoryName, setCategoryName] = useState('');
   const [price, setPrice] = useState('');
-  const [images, setImages] = useState([]); // For image previews
-  const [imageFiles, setImageFiles] = useState([]); // For form submission
+  const [bgImage, setBgImage] = useState(null);
+  const [images, setImages] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
   const [description, setDescription] = useState('');
   const [festivalDate, setFestivalDate] = useState('');
   const [size, setSize] = useState('');
   const [inStock, setInStock] = useState(false);
+  const [tags, setTags] = useState('');
+  const [email, setEmail] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [title, setTitle] = useState('');
+  const [textSettings, setTextSettings] = useState('{}');
+  const [overlaySettings, setOverlaySettings] = useState('{}');
   const [errorMessage, setErrorMessage] = useState('');
   const [categories, setCategories] = useState([]);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission status
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Fetch categories
   useEffect(() => {
     axios
-      .get('https://posterbackend.onrender.com/api/category/getall-cateogry')
+      .get('http://194.164.148.244:4061/api/category/getall-cateogry')
       .then((response) => {
         if (response.data.success) {
           setCategories(response.data.categories);
@@ -31,28 +37,39 @@ const CreatePoster = () => {
       });
   }, []);
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    const previews = files.map((file) => URL.createObjectURL(file));  // For previewing images
+  const handleBgImageChange = (e) => {
+    const file = e.target.files[0];
+    setBgImage(file);
+  };
 
-    // Append new images to the existing ones
-    setImages((prevImages) => [...prevImages, ...previews]);  // Update image previews
-    setImageFiles((prevFiles) => [...prevFiles, ...files]);  // Update image files for upload
+  const handleOverlayImagesChange = (e) => {
+    const files = Array.from(e.target.files);
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setImages((prevImages) => [...prevImages, ...previews]);
+    setImageFiles((prevFiles) => [...prevFiles, ...files]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // If already submitting, prevent multiple submissions
     if (isSubmitting) return;
 
-    // Validation check
-    if (!name || !categoryName || !price || (!imageFiles.length && !festivalDate) || !description || !size) {
-      setErrorMessage('Please fill all required fields.');
+    // Basic validation for required fields
+    if (!name || !categoryName || !price || !description || !size || !bgImage) {
+      setErrorMessage('Please fill all required fields, including the background image.');
       return;
     }
 
-    setIsSubmitting(true); // Set isSubmitting to true when submitting the form
+    // Validate JSON fields
+    try {
+      JSON.parse(textSettings);
+      JSON.parse(overlaySettings);
+    } catch {
+      setErrorMessage('Text Settings and Overlay Settings must be valid JSON.');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     const formData = new FormData();
     formData.append('name', name);
@@ -61,43 +78,51 @@ const CreatePoster = () => {
     formData.append('description', description);
     formData.append('size', size);
     formData.append('inStock', inStock);
-    if (festivalDate) {
-      formData.append('festivalDate', festivalDate);
-    }
+    if (festivalDate) formData.append('festivalDate', festivalDate);
+    if (tags) formData.append('tags', tags);
+    if (email) formData.append('email', email);
+    if (mobile) formData.append('mobile', mobile);
+    if (title) formData.append('title', title);
+    formData.append('textSettings', textSettings);
+    formData.append('overlaySettings', overlaySettings);
 
-    // Append images (both single and multiple)
+    formData.append('bgImage', bgImage);
+
     imageFiles.forEach((file) => formData.append('images', file));
 
     try {
       const response = await axios.post(
-        'https://posterbackend.onrender.com/api/poster/create-poster',
+        'http://194.164.148.244:4061/api/poster/create-canvaposter',
         formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        }
+        { headers: { 'Content-Type': 'multipart/form-data' } }
       );
 
       alert('Poster created successfully!');
-      navigate('/posterlist');  // This navigates to the /posterlist page
+      navigate('/posterlist');
 
-      // Reset form after successful submission
+      // Reset form
       setName('');
       setCategoryName('');
       setPrice('');
-      setImages([]);  // Reset previews
-      setImageFiles([]);  // Reset files
+      setBgImage(null);
+      setImages([]);
+      setImageFiles([]);
       setDescription('');
       setFestivalDate('');
       setSize('');
       setInStock(false);
+      setTags('');
+      setEmail('');
+      setMobile('');
+      setTitle('');
+      setTextSettings('{}');
+      setOverlaySettings('{}');
       setErrorMessage('');
     } catch (error) {
       console.error('Error creating poster:', error);
-      setErrorMessage('Error creating poster. Please try again.');  // Alert for error
+      setErrorMessage('Error creating poster. Please try again.');
     } finally {
-      setIsSubmitting(false); // Reset isSubmitting back to false after submission completes
+      setIsSubmitting(false);
     }
   };
 
@@ -147,18 +172,29 @@ const CreatePoster = () => {
             />
           </div>
 
-          {/* Images Upload */}
+          {/* Background Image Upload */}
           <div className="col-span-1">
-            <label className="block text-lg font-medium mb-2">Images</label>
+            <label className="block text-lg font-medium mb-2">Background Image</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleBgImageChange}
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Overlay Images Upload */}
+          <div className="col-span-1">
+            <label className="block text-lg font-medium mb-2">Overlay Images (Optional)</label>
             <input
               type="file"
               accept="image/*"
               multiple
-              onChange={handleImageChange}
+              onChange={handleOverlayImagesChange}
               className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
             />
             {images.length > 0 && (
-              <div className="mt-2 flex space-x-2">
+              <div className="mt-2 flex space-x-2 flex-wrap">
                 {images.map((img, idx) => (
                   <img
                     key={idx}
@@ -218,20 +254,91 @@ const CreatePoster = () => {
             />
             <label className="text-lg font-medium">In Stock</label>
           </div>
+
+          {/* Tags */}
+          <div className="col-span-1">
+            <label className="block text-lg font-medium mb-2">Tags (comma separated)</label>
+            <input
+              type="text"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              placeholder="e.g. summer, sale, festive"
+            />
+          </div>
+
+          {/* Email */}
+          <div className="col-span-1">
+            <label className="block text-lg font-medium mb-2">Email</label>
+            <input
+              type="email"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter email"
+            />
+          </div>
+
+          {/* Mobile */}
+          <div className="col-span-1">
+            <label className="block text-lg font-medium mb-2">Mobile</label>
+            <input
+              type="tel"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+              placeholder="Enter mobile number"
+            />
+          </div>
+
+          {/* Title */}
+          <div className="col-span-1">
+            <label className="block text-lg font-medium mb-2">Title</label>
+            <input
+              type="text"
+              className="w-full p-3 border rounded-lg shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter title"
+            />
+          </div>
+
+          {/* Text Settings */}
+          <div className="col-span-full">
+            <label className="block text-lg font-medium mb-2">Text Settings (JSON)</label>
+            <textarea
+              className="w-full p-3 border rounded-lg shadow-sm font-mono text-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
+              value={textSettings}
+              onChange={(e) => setTextSettings(e.target.value)}
+              rows="5"
+              placeholder='{"fontSize":14,"color":"#000"}'
+            />
+          </div>
+
+          {/* Overlay Settings */}
+          <div className="col-span-full">
+            <label className="block text-lg font-medium mb-2">Overlay Settings (JSON)</label>
+            <textarea
+              className="w-full p-3 border rounded-lg shadow-sm font-mono text-sm focus:ring focus:ring-blue-500 focus:border-blue-500"
+              value={overlaySettings}
+              onChange={(e) => setOverlaySettings(e.target.value)}
+              rows="5"
+              placeholder='{"opacity":0.5,"color":"#fff"}'
+            />
+          </div>
         </div>
 
-        {/* Error Message */}
         {errorMessage && <p className="text-red-600 text-center">{errorMessage}</p>}
 
-        <div className="text-center">
-          <button
-            type="submit"
-            className="bg-blue-900 text-white px-6 py-3 rounded-lg hover:bg-blue-800 transition duration-300"
-            disabled={isSubmitting}  // Disable submit button if isSubmitting is true
-          >
-            {isSubmitting ? 'Creating Poster...' : 'Create Poster'}
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`w-full py-3 mt-4 rounded-lg text-white font-semibold text-lg transition-colors ${
+            isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-700 hover:bg-blue-800'
+          }`}
+        >
+          {isSubmitting ? 'Submitting...' : 'Create Poster'}
+        </button>
       </form>
     </div>
   );

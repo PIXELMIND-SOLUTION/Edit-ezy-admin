@@ -47,7 +47,7 @@ const CreateCategory = () => {
 
     try {
       const response = await axios.post(
-        'https://posterbackend.onrender.com/api/category/create-cateogry',
+        'http://194.164.148.244:4061/api/category/create-cateogry',
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },

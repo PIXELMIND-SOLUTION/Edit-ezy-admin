@@ -18,7 +18,7 @@ const OrdersList = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          "https://posterbackend.onrender.com/api/users/allorders"
+          "http://194.164.148.244:4061/api/users/allorders"
         );
         console.log("API Response:", response.data); // Log the response to check the structure
         if (response.data && response.data.orders) {
@@ -54,7 +54,7 @@ const OrdersList = () => {
     if (selectedOrder) {
       try {
         await axios.put(
-          `https://posterbackend.onrender.com/api/users/orderstatus/${selectedOrder._id}`,
+          `http://194.164.148.244:4061/api/users/orderstatus/${selectedOrder._id}`,
           { status: newStatus }
         );
 
@@ -77,7 +77,7 @@ const OrdersList = () => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       try {
         await axios.delete(
-          `https://posterbackend.onrender.com/api/users/order/${orderId}`
+          `http://194.164.148.244:4061/api/users/order/${orderId}`
         );
         setOrdersData(ordersData.filter((order) => order._id !== orderId));
         alert("Order deleted successfully.");

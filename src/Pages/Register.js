@@ -23,7 +23,7 @@ const RegisterPage = () => {
 
     try {
       // Call the API for registration
-      const response = await fetch('https://posterbackend.onrender.com/api/admin/register', {
+      const response = await fetch('http://194.164.148.244:4061/api/admin/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

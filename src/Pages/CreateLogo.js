@@ -42,7 +42,7 @@ const CreateLogo = () => {
 
     try {
       await axios.post(
-        'https://posterbackend.onrender.com/api/admin/createlogo',
+        'http://194.164.148.244:4061/api/admin/createlogo',
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },

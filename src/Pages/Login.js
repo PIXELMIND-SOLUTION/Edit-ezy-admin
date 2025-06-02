@@ -21,7 +21,7 @@ const LoginPage = () => {
 
   try {
     // Call the API for login
-    const response = await fetch('https://posterbackend.onrender.com/api/admin/login', {
+    const response = await fetch('http://194.164.148.244:4061/api/admin/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

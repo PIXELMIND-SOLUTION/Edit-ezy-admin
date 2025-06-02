@@ -13,7 +13,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
   const handleLogout = async () => {
     try {
       // Get API URL based on environment
-      const apiUrl = process.env.REACT_APP_API_URL || "https://posterbackend.onrender.com";
+      const apiUrl = process.env.REACT_APP_API_URL || "http://194.164.148.244:4061";
 
       // Make the POST request to the logout API
       await axios.post(`${apiUrl}/api/admin/logout`, {}, { withCredentials: true });
@@ -56,6 +56,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       name: "Posters",
       dropdown: [
         { name: "Create Poster", path: "/create-poster" },
+        { name: "Create new", path: "/makeposter" },
         { name: "Get All Posters", path: "/posterlist" },
       ],
     },

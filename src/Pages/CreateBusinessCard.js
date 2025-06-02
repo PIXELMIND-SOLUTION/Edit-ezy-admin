@@ -51,7 +51,7 @@ const CreateBusinessCard = () => {
 
     try {
       await axios.post(
-        'https://posterbackend.onrender.com/api/admin/createbusinesscard',
+        'http://194.164.148.244:4061/api/admin/createbusinesscard',
         formData
       );
       navigate('/businesscardlist');

@@ -13,7 +13,7 @@ const LogoList = () => {
 
   const fetchLogos = async () => {
     try {
-      const res = await axios.get("https://posterbackend.onrender.com/api/admin/getlogos");
+      const res = await axios.get("http://194.164.148.244:4061/api/admin/getlogos");
       setLogos(res.data);
     } catch (error) {
       console.error("Failed to fetch logos", error);
@@ -56,7 +56,7 @@ const LogoList = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`https://posterbackend.onrender.com/api/admin/deletelogo/${id}`);
+      await axios.delete(`http://194.164.148.244:4061/api/admin/deletelogo/${id}`);
       alert("Logo deleted successfully!");
       fetchLogos();
     } catch (error) {
@@ -68,7 +68,7 @@ const LogoList = () => {
   const handleSaveChanges = async () => {
     try {
       await axios.put(
-        `https://posterbackend.onrender.com/api/admin/updatelogo/${editedLogoData._id}`,
+        `http://194.164.148.244:4061/api/admin/updatelogo/${editedLogoData._id}`,
         editedLogoData
       );
       alert("Logo updated successfully!");

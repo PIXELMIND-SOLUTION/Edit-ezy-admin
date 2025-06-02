@@ -10,7 +10,7 @@ const UsersPlansList = () => {
   useEffect(() => {
     const fetchUserPlans = async () => {
       try {
-        const response = await axios.get("https://posterbackend.onrender.com/api/admin/usersplans");
+        const response = await axios.get("http://194.164.148.244:4061/api/admin/usersplans");
         if (response.data && response.data.users) {
           setUsersData(response.data.users);
         }

@@ -83,6 +83,7 @@ import GetContactUsPage from "./Pages/GetContactUsPage.js";
 import BusinessPosterList from "./Pages/BusinessPosterList.js";
 import RegisterPage from "./Pages/Register.js";
 import GetProfilePage from "./Pages/GetProfilePage.js";
+import CreatePosterForm from "./Pages/CreatePosterForm.js";
 
 
 
@@ -180,6 +181,7 @@ function App() {
               <Route path="/contactus" element={<ContactUsPage />} />
               <Route path="/getcontactus" element={<GetContactUsPage />} />
                <Route path="/profile" element={<GetProfilePage />} />
+              <Route path="/makeposter" element={<CreatePosterForm />} />
 
 
 

@@ -11,7 +11,7 @@ const AboutUsFormPage = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://posterbackend.onrender.com/api/admin/aboutus", {
+      const response = await fetch("http://194.164.148.244:4061/api/admin/aboutus", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

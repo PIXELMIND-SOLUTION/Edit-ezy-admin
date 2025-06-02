@@ -27,7 +27,7 @@ const BusinessCardList = () => {
 
   const fetchCards = () => {
     axios
-      .get("https://posterbackend.onrender.com/api/admin/getbusinesscards")
+      .get("http://194.164.148.244:4061/api/admin/getbusinesscards")
       .then((res) => {
         if (res.data) {
           setCards(res.data);
@@ -80,7 +80,7 @@ const BusinessCardList = () => {
 
   const handleSaveChanges = () => {
     axios
-      .put(`https://posterbackend.onrender.com/api/admin/updatebusinesscard/${selectedCard._id}`, editedCardData)
+      .put(`http://194.164.148.244:4061/api/admin/updatebusinesscard/${selectedCard._id}`, editedCardData)
       .then(() => {
         alert("Business Card updated successfully!");
         fetchCards();
@@ -96,7 +96,7 @@ const BusinessCardList = () => {
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this card?")) return;
     axios
-      .delete(`https://posterbackend.onrender.com/api/admin/deletebusinesscard/${id}`)
+      .delete(`http://194.164.148.244:4061/api/admin/deletebusinesscard/${id}`)
       .then(() => {
         alert("Card deleted successfully!");
         setCards(cards.filter((card) => card._id !== id));
