@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FaFileCsv, FaEdit, FaTrash, FaUpload } from "react-icons/fa";
 import { CSVLink } from "react-csv";
-import * as XLSX from "xlsx";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 

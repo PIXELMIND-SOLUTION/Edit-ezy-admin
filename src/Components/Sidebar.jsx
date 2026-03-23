@@ -13,7 +13,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
   const handleLogout = async () => {
     try {
       // Get API URL based on environment
-      const apiUrl = process.env.REACT_APP_API_URL || "http://194.164.148.244:4061";
+      const apiUrl = process.env.REACT_APP_API_URL || "http://31.97.206.144:4061";
 
       // Make the POST request to the logout API
       await axios.post(`${apiUrl}/api/admin/logout`, {}, { withCredentials: true });
@@ -41,8 +41,17 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       name: "Users",
       dropdown: [
         { name: "User List", path: "/users" },
+        { name: "User ContactedList", path: "/usercontactedlist" },
+        { name: "User Redemtion List", path: "/redemptions" },
       ],
     },
+    {
+  icon: <i className="ri-flag-fill text-white"></i>,
+  name: "Reports",
+  dropdown: [
+    { name: "Reported Users", path: "/reported-users" }
+  ],
+},
     {
       icon: <i className="ri-image-fill text-white"></i>,
       name: "Categories",
@@ -56,24 +65,37 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       name: "Posters",
       dropdown: [
         { name: "Create Poster", path: "/create-poster" },
-        { name: "Create new", path: "/makeposter" },
         { name: "Get All Posters", path: "/posterlist" },
       ],
     },
     {
+  icon: <i className="ri-video-fill text-white"></i>,
+  name: "Reels",
+  dropdown: [
+    { name: "Manage Reels", path: "/reels" },
+  ],
+},
+{
+  icon: <i className="ri-music-fill text-white"></i>, // 🎵 music icon
+  name: "Audio",
+  dropdown: [
+    { name: "Manage Audio", path: "/audio" },
+  ],
+},
+    {
       icon: <i className="ri-palette-fill text-white"></i>,
       name: "Logos",
       dropdown: [
+        { name: "Logo Category", path: "/create-logocategory" },
         { name: "Create Logo", path: "/create-logo" },
         { name: "Get All Logos", path: "/logolist" },
       ],
     },
     {
-      icon: <i className="ri-file-list-fill text-white"></i>,
-      name: "Business Cards",
+      icon: <i className="ri-gallery-fill text-white"></i>,
+      name: "Banners",
       dropdown: [
-        { name: "Create Business Card", path: "/create-businesscard" },
-        { name: "Get All Business Cards", path: "/businesscardlist" },
+        { name: "Banner", path: "/banner" },
       ],
     },
     {
@@ -83,13 +105,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
         { name: "Create Plan", path: "/create-plan" },
         { name: "Get All Plans", path: "/planlist" },
         { name: "Purchased Plans", path: "/userplanlist" },
-      ],
-    },
-    {
-      icon: <i className="ri-shopping-cart-fill text-white"></i>,
-      name: "Orders",
-      dropdown: [
-        { name: "Get All Orders", path: "/orderlist" },
+       { name: "User Payments", path: "/paymentlist" },
       ],
     },
     {
@@ -126,8 +142,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
             {item.dropdown ? (
               <>
                 <div
-                  className="flex items-center py-3 px-4 font-semibold text-sm text-white mx-4 rounded-lg hover:bg-gray-700 hover:text-[#00B074] duration-300 cursor-pointer"
-                  onClick={() => toggleDropdown(item.name)}
+ className="flex items-center py-3 px-4 font-semibold text-sm text-white mx-4 rounded-lg cursor-pointer no-underline"                  onClick={() => toggleDropdown(item.name)}
                 >
                   <span className="text-xl">{item.icon}</span>
                   <span className={`ml-4 ${isCollapsed && !isMobile ? "hidden" : "block"}`}>

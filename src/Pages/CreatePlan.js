@@ -1,5 +1,10 @@
 import React, { useState } from "react";
 import axios from "axios";
+import {
+  Button,
+} from 'reactstrap';
+  import { useNavigate } from 'react-router-dom'; // at the top
+
 
 const CreatePlan = () => {
   const [name, setName] = useState("");
@@ -10,12 +15,15 @@ const CreatePlan = () => {
   const [featureInput, setFeatureInput] = useState("");
   const [features, setFeatures] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
-  const [loading, setLoading] = useState(false); // Loading state to handle multiple clicks
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate(); // Correct place for useNavigate hook
 
   const handleAddFeature = () => {
     if (featureInput.trim() !== "") {
       setFeatures([...features, featureInput.trim()]);
       setFeatureInput("");
+      setErrorMessage(""); // Clear error if any
     }
   };
 
@@ -28,12 +36,21 @@ const CreatePlan = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!name || !originalPrice || !offerPrice || !discountPercentage || !duration || features.length === 0) {
+    // Validate fields and at least one feature
+    if (
+      !name.trim() ||
+      !originalPrice.trim() ||
+      !offerPrice.trim() ||
+      !discountPercentage.trim() ||
+      !duration.trim() ||
+      features.length === 0
+    ) {
       setErrorMessage("Please fill in all fields and add at least one feature.");
       return;
     }
 
-    setLoading(true); // Set loading state to true when submitting
+    setLoading(true);
+    setErrorMessage("");
 
     const data = {
       name,
@@ -45,25 +62,33 @@ const CreatePlan = () => {
     };
 
     try {
-      const response = await axios.post("http://194.164.148.244:4061/api/plans/create-plan", data);
-      alert("Plan created successfully!");
-      console.log("Response:", response.data);
+      const response = await axios.post(
+        "http://31.97.206.144:4061/api/plans/create-plan",
+        data
+      );
 
-      // Reset form
+      alert("Plan created successfully!");
+
+      // Reset form fields
       setName("");
       setOriginalPrice("");
       setOfferPrice("");
       setDiscountPercentage("");
       setDuration("");
       setFeatures([]);
+      setFeatureInput("");
       setErrorMessage("");
+
+      // Navigate after success
+      navigate("/planlist");
     } catch (error) {
       console.error("Error creating plan:", error);
       setErrorMessage("Failed to create plan. Please try again.");
     } finally {
-      setLoading(false); // Reset loading state after the request is complete
+      setLoading(false);
     }
   };
+
 
   return (
     <div className="max-w-3xl mx-auto bg-white shadow-md rounded p-6">
@@ -148,13 +173,17 @@ const CreatePlan = () => {
           </ul>
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-900 text-white p-3 rounded hover:bg-blue-800 transition"
-          disabled={loading} // Disable button while loading
-        >
-          {loading ? "Creating..." : "Create Plan"} {/* Show loading text while submitting */}
-        </button>
+      <div className="flex justify-end">
+ <Button
+  type="submit"
+  color="primary"
+  className="px-5 py-2 rounded text-sm"
+  disabled={loading}
+>
+  {loading ? "Creating..." : "Create Plan"}
+</Button>
+</div>
+
       </form>
     </div>
   );

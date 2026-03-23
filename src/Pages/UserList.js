@@ -15,7 +15,7 @@ export default function UserList() {
 
   const fetchUsers = () => {
     axios
-      .get("http://194.164.148.244:4061/api/admin/getallusers")
+      .get("http://31.97.206.144:4061/api/admin/getallusers")
       .then((res) => {
         if (res.data && res.data.users) {
           setUsers(res.data.users);
@@ -29,7 +29,7 @@ export default function UserList() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        await axios.delete(`http://194.164.148.244:4061/api/admin/deleteuser/${id}`);
+        await axios.delete(`http://31.97.206.144:4061/api/admin/deleteuser/${id}`);
         alert("User deleted successfully");
         setUsers(users.filter((user) => user.id !== id));
       } catch (error) {

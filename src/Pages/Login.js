@@ -8,51 +8,51 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  if (!email || !password) {
-    setError('Email and password are required.');
-    return;
-  }
-
-  setIsLoading(true);
-  setError('');
-
-  try {
-    // Call the API for login
-    const response = await fetch('http://194.164.148.244:4061/api/admin/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-      // Store the adminId, name, and email in localStorage
-      const { admin, token } = data;
-      localStorage.setItem('adminId', admin._id);
-      localStorage.setItem('name', admin.name);
-      localStorage.setItem('email', admin.email);
-      localStorage.setItem('token', token);  // Optionally store the token
-
-      // Log the adminId to check if it's stored correctly
-      console.log('Admin ID saved to localStorage:', localStorage.getItem('adminId'));
-
-      // Redirect to the dashboard after successful login
-      navigate('/dashboard');
-    } else {
-      setError(data.error || 'Login failed');
+    if (!email || !password) {
+      setError('Email and password are required.');
+      return;
     }
-  } catch (err) {
-    setError('An error occurred while logging in. Please try again.');
-  } finally {
-    setIsLoading(false);
-  }
-};
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // Call the API for login
+      const response = await fetch('http://31.97.206.144:4061/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Store the adminId, name, and email in localStorage
+        const { admin, token } = data;
+        localStorage.setItem('adminId', admin._id);
+        localStorage.setItem('name', admin.name);
+        localStorage.setItem('email', admin.email);
+        localStorage.setItem('token', token);  // Optionally store the token
+
+        // Log the adminId to check if it's stored correctly
+        console.log('Admin ID saved to localStorage:', localStorage.getItem('adminId'));
+
+        // Redirect to the dashboard after successful login
+        navigate('/dashboard');
+      } else {
+        setError(data.error || 'Login failed');
+      }
+    } catch (err) {
+      setError('An error occurred while logging in. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
   return (
@@ -67,13 +67,16 @@ const LoginPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Left - Form */}
           <div className="p-8 sm:p-10 space-y-6">
-            <div className="text-center">
-              <h1 className="text-3xl font-extrabold text-center">
-                <span className="text-blue-600">POSTER</span>{' '}
-                <span className="text-black">BANAVO</span>
-              </h1>
-              <p className="text-gray-700 text-sm mt-1">Admin Login</p>
-            </div>
+           <div className="text-center">
+  <h1 className="text-3xl font-extrabold text-center flex justify-center items-center gap-2">
+    <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      POSTER
+    </span>
+    <span className="text-black">BANAVO</span>
+  </h1>
+
+  <p className="text-gray-700 text-sm mt-1">Admin Login</p>
+</div>
 
             {error && (
               <div className="p-3 text-red-600 bg-red-100 rounded-md shadow-sm text-sm">
@@ -113,22 +116,16 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className={`w-full py-3 text-white text-sm font-medium rounded-md transition duration-200 ${
-                  isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:scale-[1.02]'
-                }`}
+                className={`w-full py-3 px-6 text-white text-sm font-medium rounded-full transition duration-200
+    ${isLoading
+                    ? 'bg-gradient-to-r from-blue-400 to-purple-400 cursor-not-allowed'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:scale-[1.02]'
+                  }`}
               >
                 {isLoading ? 'Logging in...' : 'Login'}
               </button>
-            </form>
 
-            <div className="text-center text-sm text-gray-700 mt-4">
-              <p>
-                If you have no account,{' '}
-                <a href="/register" className="text-blue-600 hover:text-blue-700">
-                  Register here
-                </a>
-              </p>
-            </div>
+            </form>
           </div>
 
           {/* Right - Illustration */}

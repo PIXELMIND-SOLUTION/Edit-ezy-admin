@@ -84,6 +84,14 @@ import BusinessPosterList from "./Pages/BusinessPosterList.js";
 import RegisterPage from "./Pages/Register.js";
 import GetProfilePage from "./Pages/GetProfilePage.js";
 import CreatePosterForm from "./Pages/CreatePosterForm.js";
+import CreateBanner from "./Pages/CreateBanner.js";
+import UserContactedList from "./Pages/UserContactedList.js";
+import ReportedUsers from "./Pages/ReportedUsers.js";
+import PaymentList from "./Pages/PaymentList.js";
+import RedemptionRequests from "./Pages/RedemptionRequests.js";
+import ManageReels from "./Pages/ManageReels.js";
+import ManageAudios from "./Pages/ManageAudios.js";
+import LogoCategoryManagement from "./Pages/LogoCategoryManagement.js";
 
 
 
@@ -168,6 +176,7 @@ function App() {
               <Route path="/posterlist" element={<PosterList />} />
               <Route path="/create-logo" element={<CreateLogo />} />
               <Route path="/logolist" element={<LogoList />} />
+              <Route path="/create-logocategory" element={<LogoCategoryManagement />} />
               <Route path="/create-businesscard" element={<CreateBusinessCard />} />
               <Route path="/businesscardlist" element={<BusinessPosterList />} />
               <Route path="/create-plan" element={<CreatePlan />} />
@@ -182,6 +191,13 @@ function App() {
               <Route path="/getcontactus" element={<GetContactUsPage />} />
                <Route path="/profile" element={<GetProfilePage />} />
               <Route path="/makeposter" element={<CreatePosterForm />} />
+              <Route path="/banner" element={<CreateBanner />} />
+              <Route path="/usercontactedlist" element={<UserContactedList />} />
+               <Route path="/reported-users" element={<ReportedUsers />} />
+              <Route path="/paymentlist" element={<PaymentList />} />
+               <Route path="/redemptions" element={<RedemptionRequests />} />
+                <Route path="/reels" element={<ManageReels />} />
+              <Route path="/audio" element={<ManageAudios />} />
 
 
 

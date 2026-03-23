@@ -20,7 +20,7 @@ const PlanList = () => {
 
   const fetchPlans = async () => {
     try {
-      const response = await axios.get("http://194.164.148.244:4061/api/plans/getallplan");
+      const response = await axios.get("http://31.97.206.144:4061/api/plans/getallplan");
       setPlans(response.data.plans || []);
     } catch (error) {
       console.error("Error fetching plans:", error);
@@ -28,18 +28,28 @@ const PlanList = () => {
   };
 
   const exportData = (type) => {
-    const exportItems = filteredPlans.map(({ _id, name, originalPrice, offerPrice, features }) => ({
+  const exportItems = filteredPlans.map(
+    (
+      { _id, name, originalPrice, offerPrice, discountPercentage, duration, features = [] },
+      index
+    ) => ({
+      SI: index + 1,
       ID: _id,
-      Name: name || "N/A",
-      OriginalPrice: originalPrice || "N/A",
-      OfferPrice: offerPrice || "N/A",
-      Features: features.join(", ") || "N/A",
-    }));
-    const ws = utils.json_to_sheet(exportItems);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Plans");
-    writeFile(wb, `plans.${type}`);
-  };
+      PlanName: name || "N/A",
+      OriginalPrice: originalPrice !== undefined ? `₹${originalPrice}` : "N/A",
+      OfferPrice: offerPrice !== undefined ? `₹${offerPrice}` : "N/A",
+      DiscountPercentage: discountPercentage !== undefined ? `${discountPercentage}%` : "N/A",
+      Duration: duration || "N/A",
+      Features: features.length ? features.join(", ") : "N/A",
+    })
+  );
+
+  const ws = utils.json_to_sheet(exportItems);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, "Plans");
+  writeFile(wb, `plans.${type}`);
+};
+
 
   const filteredPlans = plans.filter((plan) =>
     (plan.name || "").toLowerCase().includes(search.toLowerCase())
@@ -67,7 +77,7 @@ const PlanList = () => {
     };
 
     axios
-      .put(`http://194.164.148.244:4061/api/plans/update/${selectedPlan._id}`, updatedPlan)
+      .put(`http://31.97.206.144:4061/api/plans/update/${selectedPlan._id}`, updatedPlan)
       .then(() => {
         setPlans(plans.map((plan) => (plan._id === selectedPlan._id ? updatedPlan : plan)));
         setIsModalOpen(false);
@@ -84,7 +94,7 @@ const PlanList = () => {
     if (!confirmDelete) return;
 
     axios
-      .delete(`http://194.164.148.244:4061/api/plans/delete/${id}`)
+      .delete(`http://31.97.206.144:4061/api/plans/delete/${id}`)
       .then(() => {
         setPlans(plans.filter((plan) => plan._id !== id));
         alert("Plan deleted successfully!");

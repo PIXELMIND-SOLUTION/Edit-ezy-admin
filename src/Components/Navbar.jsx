@@ -1,42 +1,36 @@
 import { useState, useEffect } from "react";
-import { MdShoppingCart } from "react-icons/md"; // Vendor related icon (could be for products/orders)
-import { RiMenu2Line, RiMenu3Line, RiFullscreenLine } from "react-icons/ri";
+import { MdShoppingCart } from "react-icons/md";
+import { RiMenu2Line, RiMenu3Line } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // Make sure axios is installed (npm install axios)
+import axios from "axios";
 
 const Navbar = ({ setIsCollapsed, isCollapsed }) => {
   const navigate = useNavigate();
 
-  // State to store counts
-  const [productRequests, setProductRequests] = useState(0);
-  const [orderRequests, setOrderRequests] = useState(0);
+  // New state for redemption requests
+  const [redemptionCount, setRedemptionCount] = useState(0);
 
-  // Fetch counts from API on component mount
+  // Fetch redemption request count
   useEffect(() => {
-    const fetchCounts = async () => {
+    const fetchRedemptionRequests = async () => {
       try {
-        const response = await axios.get("https://your-api-endpoint.com/api/vendor/getcount");
-        setProductRequests(response.data.totalProductRequests || 0);
-        setOrderRequests(response.data.totalOrderRequests || 0);
+        const response = await axios.get("http://31.97.206.144:4061/api/admin/getredemption-requests");
+        setRedemptionCount(response.data.requests?.length || 0); // Check if response.data.requests exists
       } catch (error) {
-        console.error("Error fetching counts:", error);
+        console.error("Error fetching redemption requests:", error);
       }
     };
 
-    fetchCounts();
+    fetchRedemptionRequests();
   }, []);
 
-  const handleProductClick = () => {
-    navigate("/vendor/productlist");
-  };
-
-  const handleOrderClick = () => {
-    navigate("/vendor/orderlist");
+  const handleRedemptionClick = () => {
+    navigate("/redemptions"); // Or whatever route you want
   };
 
   return (
-    <nav className="bg-gradient-to-r from-gray-800 to-blue-800 text-white sticky top-0 w-full p-4 flex items-center shadow-lg z-50">
-    <button onClick={() => setIsCollapsed(!isCollapsed)} className="text-xl p-2">
+    <nav className="bg-gradient-to-r from-gray-800 to-blue-800 text-white sticky top-0 w-full p-3 flex items-center shadow-lg z-50">
+      <button onClick={() => setIsCollapsed(!isCollapsed)} className="text-xl p-2">
         {isCollapsed ? (
           <RiMenu2Line className="text-2xl text-[#AAAAAA]" />
         ) : (
@@ -45,16 +39,26 @@ const Navbar = ({ setIsCollapsed, isCollapsed }) => {
       </button>
 
       <div className="flex justify-between items-center w-full">
-        <div className="flex gap-3 ml-4">
+        {/* Left Side Placeholder */}
+        <div className="flex gap-6 ml-4 items-center">
+
+          {/* 🔴 Redemption Requests Button with Count */}
+          <button
+            onClick={handleRedemptionClick}
+            className="relative px-3 py-1 bg-black-700 hover:bg-blue-600 rounded text-xl flex items-center gap-1"
+          >
+            Redemption Requests
+            {redemptionCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center">
+                {redemptionCount}
+              </span>
+            )}
+          </button>
         </div>
 
+        {/* Right Side Vendor Logo */}
         <div className="flex gap-3 items-center">
-          <button className="px-2 py-1 rounded-full bg-[#F8FAF8] cursor-pointer hover:bg-[#D9F3EA] hover:text-[#00B074] duration-300">
-            <RiFullscreenLine />
-          </button>
-
           <div className="flex flex-col justify-center items-center">
-            {/* Replaced the company logo with the new vendor image */}
             <img
               className="rounded-full w-[3vw]"
               src="https://mir-s3-cdn-cf.behance.net/projects/original/ec753e129429523.61a1e79332f16.png"

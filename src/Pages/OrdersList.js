@@ -18,7 +18,7 @@ const OrdersList = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          "http://194.164.148.244:4061/api/users/allorders"
+          "http://31.97.206.144:4061/api/users/allorders"
         );
         console.log("API Response:", response.data); // Log the response to check the structure
         if (response.data && response.data.orders) {
@@ -54,7 +54,7 @@ const OrdersList = () => {
     if (selectedOrder) {
       try {
         await axios.put(
-          `http://194.164.148.244:4061/api/users/orderstatus/${selectedOrder._id}`,
+          `http://31.97.206.144:4061/api/users/orderstatus/${selectedOrder._id}`,
           { status: newStatus }
         );
 
@@ -73,13 +73,13 @@ const OrdersList = () => {
     }
   };
 
-  const handleDelete = async (orderId) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       try {
         await axios.delete(
-          `http://194.164.148.244:4061/api/users/order/${orderId}`
+          `http://31.97.206.144:4061/api/users/deleteorder/${id}`
         );
-        setOrdersData(ordersData.filter((order) => order._id !== orderId));
+        setOrdersData(ordersData.filter((order) => order._id !== id));
         alert("Order deleted successfully.");
       } catch (err) {
         console.error("Error deleting order", err);
@@ -219,44 +219,45 @@ const OrdersList = () => {
           Next
         </button>
       </div>
+{isModalOpen && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center px-4 z-50">
+    <div className="bg-white p-4 sm:p-6 rounded-lg w-full max-w-md">
+      <h2 className="text-lg sm:text-xl font-semibold mb-4">Edit Order Status</h2>
+      
+      <div className="mb-4">
+        <label className="block mb-2 text-sm sm:text-base" htmlFor="status">
+          Status
+        </label>
+        <select
+          id="status"
+          value={newStatus}
+          onChange={handleStatusChange}
+          className="p-2 border rounded w-full text-sm sm:text-base"
+        >
+          <option value="Completed">Completed</option>
+          <option value="Pending">Pending</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+      </div>
 
-      {/* Modal for Editing Status */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg w-1/3">
-            <h2 className="text-xl font-semibold">Edit Order Status</h2>
-            <div className="my-4">
-              <label className="block mb-2" htmlFor="status">
-                Status
-              </label>
-              <select
-                id="status"
-                value={newStatus}
-                onChange={handleStatusChange}
-                className="p-2 border rounded w-full"
-              >
-                <option value="Completed">Completed</option>
-                <option value="Pending">Pending</option>
-                <option value="Cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div className="flex justify-between gap-4">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveStatus}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setIsModalOpen(false)}
+          className="px-3 py-2 bg-gray-300 rounded text-sm"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSaveStatus}
+          className="px-3 py-2 bg-blue-600 text-white rounded text-sm"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

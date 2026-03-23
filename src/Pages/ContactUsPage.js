@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const ContactUsPage = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,8 @@ const ContactUsPage = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -21,9 +24,11 @@ const ContactUsPage = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://194.164.148.244:4061/api/admin/contact", formData);
+      const res = await axios.post("http://31.97.206.144:4061/api/admin/contact", formData);
       if (res.status === 201) {
-        setSuccessMessage(res.data.message);
+        setSuccessMessage(res.data.message || "Message sent successfully!");
+        setErrorMessage("");
+
         setFormData({
           name: "",
           email: "",
@@ -31,10 +36,16 @@ const ContactUsPage = () => {
           message: "",
           address: "",
         });
+
+        // Redirect after short delay
+        setTimeout(() => {
+          navigate("/getcontactus");
+        }, 1500);
       }
     } catch (err) {
       console.error(err);
       setErrorMessage("Failed to send message. Please try again later.");
+      setSuccessMessage("");
     }
   };
 

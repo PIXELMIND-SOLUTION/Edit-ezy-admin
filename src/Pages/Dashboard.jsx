@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
-  FiFolder,
-  FiClock,
-  FiHelpCircle,
+  FiUsers,
   FiGift,
   FiHeart,
   FiCreditCard,
-  FiUsers,
 } from "react-icons/fi";
-import { AreaChart, Area, ResponsiveContainer, XAxis, Tooltip } from "recharts";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  CardBody,
+  CardTitle,
+  ListGroup,
+  ListGroupItem,
+  Spinner,
+} from "reactstrap";
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -18,7 +25,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const res = await axios.get("http://194.164.148.244:4061/api/admin/dashboard");
+        const res = await axios.get("http://31.97.206.144:4061/api/admin/dashboard");
         setDashboardData(res.data);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
@@ -30,179 +37,136 @@ const Dashboard = () => {
     fetchDashboardData();
   }, []);
 
-  if (loading) return <div className="p-6">Loading dashboard...</div>;
-  if (!dashboardData) return <div className="p-6 text-red-500">Failed to load data</div>;
+  if (loading)
+    return (
+      <div className="text-center my-5">
+        <Spinner color="primary" />
+        <p>Loading dashboard...</p>
+      </div>
+    );
+
+  if (!dashboardData)
+    return (
+      <div className="text-center my-5 text-danger">
+        Failed to load data
+      </div>
+    );
 
   const {
-    activeUsersCount,
     totalUsersCount,
-    totalOrdersCount,
-    totalSubscriptionPlans,
+    totalPosters,
+    totalCategories,
+    totalBanners,
+    totalLogos,
     totalActiveSubscriptions,
-    todaysOrders,
-    totalEarnings,
-    completedOrdersCount,
+    activeUsersCount,
     birthdayUsers,
     anniversaryUsers,
     planSummary,
-    weeklyEarnings,
-    weeklyCompletedOrders,
   } = dashboardData;
 
   const topStats = [
-    { label: "Total Users", value: totalUsersCount },
-    { label: "Total Orders", value: totalOrdersCount },
-    { label: "Total Plans", value: totalSubscriptionPlans },
-    { label: "Active Subscriptions", value: totalActiveSubscriptions },
+    { label: "Total Users", value: totalUsersCount, bg: "#E0F2FE", color: "#0284C7" },
+    { label: "Total Posters", value: totalPosters, bg: "#EDE9FE", color: "#7C3AED" },
+    { label: "Total Categories", value: totalCategories, bg: "#FCE7F3", color: "#BE185D" },
+    { label: "Total Banners", value: totalBanners, bg: "#FEF9C3", color: "#CA8A04" },
+    { label: "Total Logos", value: totalLogos, bg: "#E0E7FF", color: "#4338CA" },
+    { label: "Active Subscriptions", value: totalActiveSubscriptions, bg: "#D1FAE5", color: "#059669" },
+    { label: "Active Users", value: activeUsersCount, bg: "#FEF2F2", color: "#DC2626" },
   ];
 
   return (
-    <div className="bg-gray-100 min-h-screen p-6 space-y-6">
-      {/* TOP METRICS */}
-      <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+    <Container className="my-4">
+      {/* TOP STATS */}
+      <Row className="mb-4">
         {topStats.map((stat, index) => (
-          <div key={index} className="bg-white p-4 rounded shadow text-center">
-            <h3 className="text-sm text-gray-500">{stat.label}</h3>
-            <p className="text-2xl font-bold">{stat.value}</p>
-          </div>
+          <Col sm="6" md="4" lg="3" key={index} className="mb-3">
+            <Card style={{ backgroundColor: stat.bg, border: "none" }} className="shadow-sm">
+              <CardBody className="text-center">
+                <CardTitle tag="h6" className="mb-1" style={{ color: stat.color }}>
+                  {stat.label}
+                </CardTitle>
+                <h2 className="fw-bold" style={{ color: stat.color }}>{stat.value}</h2>
+              </CardBody>
+            </Card>
+          </Col>
         ))}
-      </div>
+      </Row>
 
-      {/* USERS + ORDERS */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {/* Active Users */}
-        <div className="bg-white p-4 rounded shadow">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <FiUsers className="text-blue-600 bg-blue-100 p-2 rounded-lg text-4xl" />
-              <h2 className="text-lg font-semibold">Active Users</h2>
-            </div>
-            <span className="text-2xl font-bold">{activeUsersCount}</span>
-          </div>
-        </div>
-
-        {/* Today's Orders */}
-        <div className="bg-white p-4 rounded shadow col-span-2 space-y-4">
-          <h2 className="text-xl font-bold">Today's Orders</h2>
-          <div className="space-y-3">
-            {todaysOrders.length === 0 ? (
-              <p className="text-gray-500">No orders for today.</p>
-            ) : (
-              todaysOrders.map((order, i) => (
-                <div key={order._id || i}>
-                  <div className="flex items-center gap-2">
-                    <FiClock className="text-blue-600 bg-blue-100 p-2 rounded-lg text-3xl" />
-                    <p className="font-semibold">
-                      Order #{order._id?.slice(-5) || "N/A"} - {order.status}
-                    </p>
+      {/* BIRTHDAYS + ANNIVERSARIES + PLANS */}
+      <Row>
+        <Col md="4" className="mb-3">
+          <Card className="shadow-sm h-100">
+            <CardBody>
+              <div className="d-flex align-items-center mb-3">
+                <FiGift size={36} className="text-pink-600 bg-pink-100 rounded p-2 me-2" />
+                <h5 className="mb-0 fw-bold">Today's Birthdays</h5>
+              </div>
+              {birthdayUsers.length === 0 ? (
+                <p className="text-muted">No birthdays today.</p>
+              ) : (
+                birthdayUsers.map((user, i) => (
+                  <div key={user._id || i} className="d-flex justify-content-between mb-2">
+                    <div>
+                      <strong>{user.name}</strong>{" "}
+                      <small className="text-muted">({user.dob})</small>
+                    </div>
+                    <span className="text-pink-600">🎉</span>
                   </div>
-                  <p className="text-sm text-gray-500 ml-10">
-                    Amount: ₹{order.totalAmount} • {new Date(order.orderDate).toDateString()}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
+                ))
+              )}
+            </CardBody>
+          </Card>
+        </Col>
 
-      {/* EARNINGS + COMPLETED ORDERS */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold">This Week's Earnings</h2>
-          <p className="text-2xl font-bold mb-2">₹{totalEarnings}</p>
-          <div className="h-24">
-            {weeklyEarnings && weeklyEarnings.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={weeklyEarnings}>
-                  <XAxis dataKey="day" />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="amount" stroke="#4F46E5" fill="#C7D2FE" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-gray-400 text-sm text-center">(No earnings data for graph)</p>
-            )}
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded shadow">
-          <div className="flex justify-between items-center text-xl font-semibold">
-            Completed Orders
-            <FiHelpCircle className="text-gray-400" />
-          </div>
-          <p className="text-sm mb-2">{completedOrdersCount} Orders</p>
-          <div className="h-24">
-            {weeklyCompletedOrders && weeklyCompletedOrders.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={weeklyCompletedOrders}>
-                  <XAxis dataKey="day" />
-                  <Tooltip />
-                  <Area type="monotone" dataKey="count" stroke="#10B981" fill="#A7F3D0" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-gray-400 text-sm text-center">(No orders data for graph)</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* BIRTHDAYS + ANNIVERSARIES + SUBSCRIPTIONS */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold mb-3">Today's User Birthdays</h2>
-          <FiGift className="text-pink-600 bg-pink-100 p-2 rounded-lg text-3xl mb-2" />
-          {birthdayUsers.length === 0 ? (
-            <p className="text-gray-500">No birthdays today.</p>
-          ) : (
-            birthdayUsers.map((user, i) => (
-              <div key={user._id || i} className="flex items-center space-x-2 mb-2">
-                <img
-                  src={user.profileImage || `https://randomuser.me/api/portraits/men/${i + 1}.jpg`}
-                  className="w-8 h-8 rounded-full"
-                />
-                <p>{user.name}</p>
+        <Col md="4" className="mb-3">
+          <Card className="shadow-sm h-100">
+            <CardBody>
+              <div className="d-flex align-items-center mb-3">
+                <FiHeart size={36} className="text-danger bg-danger bg-opacity-10 rounded p-2 me-2" />
+                <h5 className="mb-0 fw-bold">Anniversaries</h5>
               </div>
-            ))
-          )}
-        </div>
+              {anniversaryUsers.length === 0 ? (
+                <p className="text-muted">No anniversaries today.</p>
+              ) : (
+                anniversaryUsers.map((user, i) => (
+                  <div key={user._id || i} className="d-flex justify-content-between mb-2">
+                    <div>
+                      <strong>{user.name}</strong>{" "}
+                      <small className="text-muted">({user.marriageAnniversaryDate})</small>
+                    </div>
+                    <span className="text-danger">💞</span>
+                  </div>
+                ))
+              )}
+            </CardBody>
+          </Card>
+        </Col>
 
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold mb-3">Anniversaries</h2>
-          <FiHeart className="text-red-600 bg-red-100 p-2 rounded-lg text-3xl mb-2" />
-          {anniversaryUsers.length === 0 ? (
-            <p className="text-gray-500">No anniversaries today.</p>
-          ) : (
-            anniversaryUsers.map((user, i) => (
-              <div key={user._id || i} className="flex items-center space-x-2 mb-2">
-                <img
-                  src={user.profileImage || `https://randomuser.me/api/portraits/women/${i + 1}.jpg`}
-                  className="w-8 h-8 rounded-full"
-                />
-                <p>{user.name}</p>
+        <Col md="4" className="mb-3">
+          <Card className="shadow-sm h-100">
+            <CardBody>
+              <div className="d-flex align-items-center mb-3">
+                <FiCreditCard size={36} className="text-success bg-success bg-opacity-10 rounded p-2 me-2" />
+                <h5 className="mb-0 fw-bold">Subscription Plans</h5>
               </div>
-            ))
-          )}
-        </div>
-
-        <div className="bg-white p-4 rounded shadow">
-          <h2 className="text-xl font-bold mb-4">Subscription Plans</h2>
-          <FiCreditCard className="text-green-600 bg-green-100 p-2 rounded-lg text-3xl mb-2" />
-          <ul className="space-y-3 text-sm">
-            {Object.entries(planSummary).map(([plan, count], i) => (
-              <li key={i}>
-                <p className="font-semibold text-lg">{plan}</p>
-                <div className="text-gray-500 flex justify-between text-xs">
-                  <span>Users Subscribed</span>
-                  <span>{count}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
+              {Object.keys(planSummary).length === 0 ? (
+                <p className="text-muted">No active subscriptions.</p>
+              ) : (
+                <ListGroup flush>
+                  {Object.entries(planSummary).map(([plan, count], i) => (
+                    <ListGroupItem key={i} className="d-flex justify-content-between px-0">
+                      <span className="fw-bold">{plan}</span>
+                      <small className="text-muted">{count} Users</small>
+                    </ListGroupItem>
+                  ))}
+                </ListGroup>
+              )}
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
+    </Container>
   );
 };
 

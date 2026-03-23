@@ -10,14 +10,11 @@ export default function CategoryList() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [categoryName, setCategoryName] = useState("");
-  const [categoryImage, setCategoryImage] = useState("");
-  const [subCategoryName, setSubCategoryName] = useState("");
   const categoriesPerPage = 5;
 
   useEffect(() => {
-    // Fetch categories from the server
     axios
-      .get("http://194.164.148.244:4061/api/category/getall-cateogry")  // API endpoint
+      .get("http://31.97.206.144:4061/api/category/getall-cateogry")
       .then((res) => {
         if (res.data && res.data.categories) {
           setCategories(res.data.categories);
@@ -29,17 +26,24 @@ export default function CategoryList() {
   }, []);
 
   const exportData = (type) => {
-    const exportItems = filteredCategories.map(({ _id, categoryName, subCategoryName, image }) => ({
+  const exportItems = filteredCategories.map(
+    ({ _id, categoryName, createdAt }, index) => ({
+      SI: index + 1,
       ID: _id,
       Category: categoryName || "N/A",
-      Subcategory: subCategoryName || "N/A",
-      Image: image || "N/A",
-    }));
-    const ws = utils.json_to_sheet(exportItems);
-    const wb = utils.book_new();
-    utils.book_append_sheet(wb, ws, "Categories");
-    writeFile(wb, `categories.${type}`);
-  };
+      "Created At": createdAt
+        ? new Date(createdAt).toLocaleDateString() // ✅ Only Date, no time
+        : "N/A",
+    })
+  );
+
+  const ws = utils.json_to_sheet(exportItems);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, "Categories");
+  writeFile(wb, `categories.${type}`);
+};
+
+
 
   const filteredCategories = categories.filter((cat) =>
     (cat.categoryName || "").toLowerCase().includes(search.toLowerCase())
@@ -53,8 +57,6 @@ export default function CategoryList() {
   const handleEdit = (category) => {
     setSelectedCategory(category);
     setCategoryName(category.categoryName || "");
-    setSubCategoryName(category.subCategoryName || "");
-    setCategoryImage(category.image || "");
     setModalOpen(true);
   };
 
@@ -62,52 +64,41 @@ export default function CategoryList() {
     const updatedCategory = {
       ...selectedCategory,
       categoryName,
-      subCategoryName,
-      image: categoryImage,
     };
 
-    // Update category API call
     axios
-      .put(`http://194.164.148.244:4061/api/category/update/${selectedCategory._id}`, updatedCategory)
+      .put(`http://31.97.206.144:4061/api/category/update/${selectedCategory._id}`, updatedCategory)
       .then(() => {
         setCategories(categories.map((cat) => (cat._id === selectedCategory._id ? updatedCategory : cat)));
         setModalOpen(false);
-        resetModalState();
-        alert("Category updated successfully!");  // Alert for successful update
+        setCategoryName("");
+        setSelectedCategory(null);
+        alert("Category updated successfully!");
       })
       .catch((error) => {
         console.error("Error updating category:", error);
-        alert("Error updating category. Please try again.");  // Alert for error
+        alert("Error updating category. Please try again.");
       });
   };
 
   const handleDelete = (id) => {
-    // Confirm deletion using an alert
     const confirmDelete = window.confirm("Are you sure you want to delete this category?");
     if (!confirmDelete) return;
 
-    // Delete category API call
     axios
-      .delete(`http://194.164.148.244:4061/api/category/delete/${id}`)
+      .delete(`http://31.97.206.144:4061/api/category/delete/${id}`)
       .then(() => {
         setCategories(categories.filter((cat) => cat._id !== id));
-        alert("Category deleted successfully!");  // Alert for successful deletion
+        alert("Category deleted successfully!");
       })
       .catch((error) => {
         console.error("Error deleting category:", error);
-        alert("Error deleting category. Please try again.");  // Alert for error
+        alert("Error deleting category. Please try again.");
       });
   };
 
-  const resetModalState = () => {
-    setCategoryName("");
-    setCategoryImage("");
-    setSubCategoryName("");
-    setSelectedCategory(null);
-  };
-
   return (
-    <div className="p-4 border rounded-lg shadow-lg bg-white">
+    <div className="p-4 border rounded-lg shadow-lg bg-white max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-blue-900">All Categories</h2>
       </div>
@@ -130,13 +121,11 @@ export default function CategoryList() {
       </div>
 
       <div className="overflow-x-auto mb-4">
-        <table className="w-full border-collapse border border-gray-300">
+        <table className="w-full text-center border-collapse border border-gray-300">
           <thead>
             <tr className="bg-purple-600 text-white">
               <th className="p-2 border">Sl</th>
-              <th className="p-2 border">Image</th>
               <th className="p-2 border">Category</th>
-              <th className="p-2 border">Subcategory</th>
               <th className="p-2 border">Created At</th>
               <th className="p-2 border">Action</th>
             </tr>
@@ -145,21 +134,11 @@ export default function CategoryList() {
             {currentCategories.map((cat, index) => (
               <tr key={cat._id} className="border-b">
                 <td className="p-2 border">{index + 1 + indexOfFirst}</td>
-                <td className="p-2 border">
-                  {/* Image display */}
-                  <img
-                    src={cat.image}
-                    alt={cat.categoryName}
-                    className="w-12 h-12 rounded object-cover"
-                    onError={(e) => (e.target.src = "https://via.placeholder.com/50")}
-                  />
-                </td>
                 <td className="p-2 border">{cat.categoryName || "N/A"}</td>
-                <td className="p-2 border">{cat.subCategoryName || "—"}</td>
                 <td className="p-2 border">
                   {new Date(cat.createdAt).toLocaleDateString()}
                 </td>
-                <td className="p-2 border flex gap-2">
+                <td className="p-2 border flex justify-center gap-2">
                   <button
                     onClick={() => handleEdit(cat)}
                     className="bg-blue-500 text-white p-1 rounded"
@@ -179,7 +158,6 @@ export default function CategoryList() {
         </table>
       </div>
 
-   {/* Pagination similar to PosterList */}
       <div className="flex justify-between mt-4">
         <button
           onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
@@ -197,6 +175,7 @@ export default function CategoryList() {
           Next
         </button>
       </div>
+
       {/* Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
@@ -208,24 +187,6 @@ export default function CategoryList() {
                 type="text"
                 value={categoryName}
                 onChange={(e) => setCategoryName(e.target.value)}
-                className="w-full p-2 border rounded mb-4"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Subcategory Name</label>
-              <input
-                type="text"
-                value={subCategoryName}
-                onChange={(e) => setSubCategoryName(e.target.value)}
-                className="w-full p-2 border rounded mb-4"
-              />
-            </div>
-            <div>
-              <label className="block mb-2">Category Image URL</label>
-              <input
-                type="text"
-                value={categoryImage}
-                onChange={(e) => setCategoryImage(e.target.value)}
                 className="w-full p-2 border rounded mb-4"
               />
             </div>

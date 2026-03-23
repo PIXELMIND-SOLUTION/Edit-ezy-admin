@@ -51,7 +51,7 @@ const CreateBusinessCard = () => {
 
     try {
       await axios.post(
-        'http://194.164.148.244:4061/api/admin/createbusinesscard',
+        'http://31.97.206.144:4061/api/admin/createbusinesscard',
         formData
       );
       navigate('/businesscardlist');

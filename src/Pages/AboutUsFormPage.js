@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AboutUsFormPage = () => {
   const [aboutTitle, setAboutTitle] = useState("");
@@ -7,11 +8,13 @@ const AboutUsFormPage = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://194.164.148.244:4061/api/admin/aboutus", {
+      const response = await fetch("http://31.97.206.144:4061/api/admin/aboutus", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -28,6 +31,11 @@ const AboutUsFormPage = () => {
       if (response.ok) {
         setSuccessMessage(data.message || "About Us section saved successfully!");
         setErrorMessage("");
+
+        // Redirect after short delay
+        setTimeout(() => {
+          navigate("/getaboutus");
+        }, 1500);
       } else {
         setErrorMessage(data.message || "Failed to save About Us section.");
         setSuccessMessage("");

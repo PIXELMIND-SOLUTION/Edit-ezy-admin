@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const PrivacyPolicyForm = () => {
   const [policyTitle, setPolicyTitle] = useState("");
@@ -9,6 +10,8 @@ const PrivacyPolicyForm = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -17,7 +20,7 @@ const PrivacyPolicyForm = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://194.164.148.244:4061/api/admin/privacy-policy", {
+      const response = await axios.post("http://31.97.206.144:4061/api/admin/privacy-policy", {
         title: policyTitle,
         content: policyContent,
         date,
@@ -28,6 +31,11 @@ const PrivacyPolicyForm = () => {
         setPolicyTitle("");
         setPolicyContent("");
         setDate("");
+
+        // Redirect after short delay
+        setTimeout(() => {
+          navigate("/get-policy");
+        }, 1500);
       }
     } catch (error) {
       console.error("Error saving privacy policy:", error);
@@ -36,7 +44,6 @@ const PrivacyPolicyForm = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-semibold text-blue-900 mb-6">Create Privacy Policy</h2>
