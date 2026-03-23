@@ -92,6 +92,10 @@ import RedemptionRequests from "./Pages/RedemptionRequests.js";
 import ManageReels from "./Pages/ManageReels.js";
 import ManageAudios from "./Pages/ManageAudios.js";
 import LogoCategoryManagement from "./Pages/LogoCategoryManagement.js";
+import StickerCategoryManagement from "./Pages/StickerCategoryManagement.js";
+import StickerManagement from "./Pages/StickerManagement.js";
+import WalletSettings from "./Pages/WalletSettings.js";
+import AmountSettings from "./Pages/AmountSettings.js";
 
 
 
@@ -198,6 +202,10 @@ function App() {
                <Route path="/redemptions" element={<RedemptionRequests />} />
                 <Route path="/reels" element={<ManageReels />} />
               <Route path="/audio" element={<ManageAudios />} />
+              <Route path="/stickers-category" element={<StickerCategoryManagement />} />
+              <Route path="/create-sticker" element={<StickerManagement />} />
+               <Route path="/userwallet" element={<WalletSettings />} />
+              <Route path="/amount-config" element={<AmountSettings />} />
 
 
 

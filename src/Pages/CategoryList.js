@@ -1,207 +1,241 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { utils, writeFile } from "xlsx";
 import axios from "axios";
+import { utils, writeFile } from "xlsx";
 
-export default function CategoryList() {
+export default function CategoryPage() {
+  // ===== CREATE =====
+  const [categoryName, setCategoryName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ===== LIST =====
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+
+  // ===== EDIT =====
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [categoryName, setCategoryName] = useState("");
+
   const categoriesPerPage = 5;
 
-  useEffect(() => {
+  // 🔄 Fetch Categories
+  const fetchCategories = () => {
     axios
       .get("http://31.97.206.144:4061/api/category/getall-cateogry")
-      .then((res) => {
-        if (res.data && res.data.categories) {
-          setCategories(res.data.categories);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching categories:", error);
-      });
+      .then((res) => setCategories(res.data?.categories || []))
+      .catch((err) => console.error(err));
+  };
+
+  useEffect(() => {
+    fetchCategories();
   }, []);
 
-  const exportData = (type) => {
-  const exportItems = filteredCategories.map(
-    ({ _id, categoryName, createdAt }, index) => ({
-      SI: index + 1,
-      ID: _id,
-      Category: categoryName || "N/A",
-      "Created At": createdAt
-        ? new Date(createdAt).toLocaleDateString() // ✅ Only Date, no time
-        : "N/A",
-    })
-  );
+  // ✅ CREATE CATEGORY
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!categoryName.trim()) return alert("Enter category");
 
-  const ws = utils.json_to_sheet(exportItems);
-  const wb = utils.book_new();
-  utils.book_append_sheet(wb, ws, "Categories");
-  writeFile(wb, `categories.${type}`);
-};
+    setIsSubmitting(true);
+    try {
+      await axios.post(
+        "http://31.97.206.144:4061/api/category/create-cateogry",
+        { categoryName }
+      );
+      setCategoryName("");
+      fetchCategories();
+    } catch {
+      alert("Error creating category");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
+  // ✅ DELETE
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this category?")) return;
+    await axios.delete(
+      `http://31.97.206.144:4061/api/category/delete/${id}`
+    );
+    fetchCategories();
+  };
 
+  // ✅ EDIT
+  const handleEdit = (cat) => {
+    setSelectedCategory(cat);
+    setCategoryName(cat.categoryName);
+    setModalOpen(true);
+  };
 
-  const filteredCategories = categories.filter((cat) =>
-    (cat.categoryName || "").toLowerCase().includes(search.toLowerCase())
+  const handleUpdate = async () => {
+    await axios.put(
+      `http://31.97.206.144:4061/api/category/update/${selectedCategory._id}`,
+      { categoryName }
+    );
+    setModalOpen(false);
+    setCategoryName("");
+    fetchCategories();
+  };
+
+  // 🔍 FILTER
+  const filtered = categories.filter((c) =>
+    c.categoryName.toLowerCase().includes(search.toLowerCase())
   );
 
   const indexOfLast = currentPage * categoriesPerPage;
   const indexOfFirst = indexOfLast - categoriesPerPage;
-  const currentCategories = filteredCategories.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filteredCategories.length / categoriesPerPage);
+  const current = filtered.slice(indexOfFirst, indexOfLast);
+  const totalPages = Math.ceil(filtered.length / categoriesPerPage);
 
-  const handleEdit = (category) => {
-    setSelectedCategory(category);
-    setCategoryName(category.categoryName || "");
-    setModalOpen(true);
-  };
-
-  const handleSaveChanges = () => {
-    const updatedCategory = {
-      ...selectedCategory,
-      categoryName,
-    };
-
-    axios
-      .put(`http://31.97.206.144:4061/api/category/update/${selectedCategory._id}`, updatedCategory)
-      .then(() => {
-        setCategories(categories.map((cat) => (cat._id === selectedCategory._id ? updatedCategory : cat)));
-        setModalOpen(false);
-        setCategoryName("");
-        setSelectedCategory(null);
-        alert("Category updated successfully!");
-      })
-      .catch((error) => {
-        console.error("Error updating category:", error);
-        alert("Error updating category. Please try again.");
-      });
-  };
-
-  const handleDelete = (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this category?");
-    if (!confirmDelete) return;
-
-    axios
-      .delete(`http://31.97.206.144:4061/api/category/delete/${id}`)
-      .then(() => {
-        setCategories(categories.filter((cat) => cat._id !== id));
-        alert("Category deleted successfully!");
-      })
-      .catch((error) => {
-        console.error("Error deleting category:", error);
-        alert("Error deleting category. Please try again.");
-      });
+  // 📤 EXPORT
+  const exportData = (type) => {
+    const data = filtered.map((c, i) => ({
+      SI: i + 1,
+      Category: c.categoryName,
+      Date: new Date(c.createdAt).toLocaleDateString(),
+    }));
+    const ws = utils.json_to_sheet(data);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Categories");
+    writeFile(wb, `categories.${type}`);
   };
 
   return (
-    <div className="p-4 border rounded-lg shadow-lg bg-white max-w-5xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-semibold text-blue-900">All Categories</h2>
-      </div>
+    <div className="p-4 sm:p-6">
 
-      <div className="flex justify-between mb-4">
-        <input
-          className="w-1/3 p-2 border rounded"
-          placeholder="Search by category name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <div className="flex gap-2">
-          <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("csv")}>
-            CSV
-          </button>
-          <button className="bg-gray-200 px-4 py-2 rounded" onClick={() => exportData("xlsx")}>
-            Excel
-          </button>
+      {/* 🔥 GRID LAYOUT */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* ================= CREATE ================= */}
+        <div className="bg-white p-3 rounded-xl shadow-md h-fit">
+          <h4 className="text-lg font-semibold text-blue-600 mb-4">
+            Create Category
+          </h4>
+
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <input
+              type="text"
+              placeholder="Enter category name"
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              className="w-full p-2 border rounded-lg"
+            />
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-blue-600 text-white py-2 rounded-lg"
+            >
+              {isSubmitting ? "Creating..." : "Create"}
+            </button>
+          </form>
+        </div>
+
+        {/* ================= LIST ================= */}
+        <div className="lg:col-span-2 bg-white p-3 rounded-xl shadow-md">
+
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row justify-between gap-3 mb-4">
+            <h4 className="text-lg font-semibold text-blue-900">
+              All Categories
+            </h4>
+
+            <div className="flex gap-2 flex-wrap">
+              <input
+                className="p-2 border rounded-lg"
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              <button onClick={() => exportData("csv")} className="bg-gray-200 px-3 py-1 rounded">
+                CSV
+              </button>
+              <button onClick={() => exportData("xlsx")} className="bg-gray-200 px-3 py-1 rounded">
+                Excel
+              </button>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border">
+              <thead className="bg-purple-600 text-white">
+                <tr>
+                  <th className="p-2">#</th>
+                  <th className="p-2">Category</th>
+                  <th className="p-2 hidden sm:table-cell">Date</th>
+                  <th className="p-2">Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {current.map((cat, i) => (
+                  <tr key={cat._id} className="border-b">
+                    <td className="p-2">{i + 1 + indexOfFirst}</td>
+                    <td className="p-2">{cat.categoryName}</td>
+                    <td className="p-2 hidden sm:table-cell">
+                      {new Date(cat.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="p-2 flex justify-center gap-2">
+                      <button onClick={() => handleEdit(cat)} className="bg-blue-500 text-white p-1 rounded">
+                        <FaEdit />
+                      </button>
+                      <button onClick={() => handleDelete(cat._id)} className="bg-red-500 text-white p-1 rounded">
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+              className="bg-blue-500 text-white px-3 py-1 rounded"
+            >
+              Prev
+            </button>
+            <span>
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+              className="bg-blue-500 text-white px-3 py-1 rounded"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto mb-4">
-        <table className="w-full text-center border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-purple-600 text-white">
-              <th className="p-2 border">Sl</th>
-              <th className="p-2 border">Category</th>
-              <th className="p-2 border">Created At</th>
-              <th className="p-2 border">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentCategories.map((cat, index) => (
-              <tr key={cat._id} className="border-b">
-                <td className="p-2 border">{index + 1 + indexOfFirst}</td>
-                <td className="p-2 border">{cat.categoryName || "N/A"}</td>
-                <td className="p-2 border">
-                  {new Date(cat.createdAt).toLocaleDateString()}
-                </td>
-                <td className="p-2 border flex justify-center gap-2">
-                  <button
-                    onClick={() => handleEdit(cat)}
-                    className="bg-blue-500 text-white p-1 rounded"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cat._id)}
-                    className="bg-red-500 text-white p-1 rounded"
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
-          className="bg-blue-500 text-white p-2 rounded"
-        >
-          Previous
-        </button>
-        <span>
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
-          className="bg-blue-500 text-white p-2 rounded"
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Edit Modal */}
+      {/* ================= MODAL ================= */}
       {modalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded-lg w-1/3">
-            <h3 className="text-xl font-semibold mb-4">Edit Category</h3>
-            <div>
-              <label className="block mb-2">Category Name</label>
-              <input
-                type="text"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                className="w-full p-2 border rounded mb-4"
-              />
-            </div>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-3">
+          <div className="bg-white rounded-xl p-5 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-3">Edit Category</h3>
+
+            <input
+              value={categoryName}
+              onChange={(e) => setCategoryName(e.target.value)}
+              className="w-full p-2 border rounded mb-3"
+            />
+
             <div className="flex justify-between">
               <button
                 onClick={() => setModalOpen(false)}
-                className="bg-gray-500 text-white px-4 py-2 rounded"
+                className="bg-gray-400 text-white px-3 py-1 rounded"
               >
                 Cancel
               </button>
               <button
-                onClick={handleSaveChanges}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
+                onClick={handleUpdate}
+                className="bg-blue-600 text-white px-3 py-1 rounded"
               >
-                Save Changes
+                Update
               </button>
             </div>
           </div>

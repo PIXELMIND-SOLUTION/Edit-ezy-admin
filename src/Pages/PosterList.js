@@ -15,7 +15,8 @@ export default function PosterList() {
     name: "",
     categoryName: "",
     title: "",
-    description: ""
+    description: "",
+    posterlang: ""
   });
 
   const [previewModalImage, setPreviewModalImage] = useState(null);
@@ -60,7 +61,8 @@ export default function PosterList() {
       name: poster.name || "",
       categoryName: poster.categoryName || "",
       title: poster.title || "",
-      description: poster.description || ""
+      description: poster.description || "",
+      posterlang: poster.posterlang || ""
     });
     setModalOpen(true);
   };
@@ -90,6 +92,7 @@ export default function PosterList() {
       Category: poster.categoryName || "N/A",
       Title: poster.title || "N/A",
       Description: poster.description || "N/A",
+      PosterLang: poster.posterlang || "N/A",
       Tags: Array.isArray(poster.tags) ? poster.tags.join(", ") : "N/A",
       PosterImage: poster.posterImage?.url || "N/A",
       CreatedAt: poster.createdAt ? new Date(poster.createdAt).toLocaleString() : "N/A"
@@ -127,9 +130,10 @@ export default function PosterList() {
               <th className="p-2 border">Title</th>
               <th className="p-2 border">Name</th>
               <th className="p-2 border">Category</th>
+              <th className="p-2 border">Poster Lang</th>
               <th className="p-2 border">Description</th>
               <th className="p-2 border">Action</th>
-            </tr>
+             </tr>
           </thead>
           <tbody>
             {currentPosters.map((poster, index) => (
@@ -151,6 +155,7 @@ export default function PosterList() {
                 <td className="p-2 border">{poster.title || "N/A"}</td>
                 <td className="p-2 border">{poster.name || "N/A"}</td>
                 <td className="p-2 border">{poster.categoryName || "N/A"}</td>
+                <td className="p-2 border">{poster.posterlang || "N/A"}</td>
                 <td className="p-2 border">
                   <div className="max-w-xs truncate" title={poster.description}>
                     {poster.description || "N/A"}
@@ -226,6 +231,12 @@ export default function PosterList() {
                 placeholder="Title"
                 value={editedData.title}
                 onChange={(e) => setEditedData({ ...editedData, title: e.target.value })}
+              />
+              <input
+                className="w-full p-2 border rounded"
+                placeholder="Poster Language"
+                value={editedData.posterlang}
+                onChange={(e) => setEditedData({ ...editedData, posterlang: e.target.value })}
               />
               <textarea
                 className="w-full p-2 border rounded"

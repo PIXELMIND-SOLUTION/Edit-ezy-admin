@@ -46,17 +46,16 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       ],
     },
     {
-  icon: <i className="ri-flag-fill text-white"></i>,
-  name: "Reports",
-  dropdown: [
-    { name: "Reported Users", path: "/reported-users" }
-  ],
-},
+      icon: <i className="ri-flag-fill text-white"></i>,
+      name: "Reports",
+      dropdown: [
+        { name: "Reported Users", path: "/reported-users" }
+      ],
+    },
     {
       icon: <i className="ri-image-fill text-white"></i>,
       name: "Categories",
       dropdown: [
-        { name: "Create Category", path: "/create-category" },
         { name: "Get All Categories", path: "/categorylist" },
       ],
     },
@@ -69,19 +68,19 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       ],
     },
     {
-  icon: <i className="ri-video-fill text-white"></i>,
-  name: "Reels",
-  dropdown: [
-    { name: "Manage Reels", path: "/reels" },
-  ],
-},
-{
-  icon: <i className="ri-music-fill text-white"></i>, // 🎵 music icon
-  name: "Audio",
-  dropdown: [
-    { name: "Manage Audio", path: "/audio" },
-  ],
-},
+      icon: <i className="ri-video-fill text-white"></i>,
+      name: "Reels",
+      dropdown: [
+        { name: "Manage Reels", path: "/reels" },
+      ],
+    },
+    {
+      icon: <i className="ri-music-fill text-white"></i>,
+      name: "Audio",
+      dropdown: [
+        { name: "Manage Audio", path: "/audio" },
+      ],
+    },
     {
       icon: <i className="ri-palette-fill text-white"></i>,
       name: "Logos",
@@ -89,6 +88,15 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
         { name: "Logo Category", path: "/create-logocategory" },
         { name: "Create Logo", path: "/create-logo" },
         { name: "Get All Logos", path: "/logolist" },
+      ],
+    },
+    {
+      icon: <i className="ri-sticker-fill text-white"></i>,
+      name: "Stickers",
+      dropdown: [
+        { name: "Sticker Category", path: "/stickers-category" },
+        { name: "Create Sticker", path: "/create-sticker" },
+        { name: "Get All Stickers", path: "/stickerlist" },
       ],
     },
     {
@@ -105,8 +113,18 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
         { name: "Create Plan", path: "/create-plan" },
         { name: "Get All Plans", path: "/planlist" },
         { name: "Purchased Plans", path: "/userplanlist" },
-       { name: "User Payments", path: "/paymentlist" },
+        { name: "User Payments", path: "/paymentlist" },
       ],
+    },
+    {
+      icon: <i className="ri-wallet-fill text-white"></i>,
+      name: "Set User Wallet",
+      path: "/userwallet",
+    },
+    {
+      icon: <i className="ri-money-rupee-circle-fill text-white"></i>,
+      name: "Amount Config",
+      path: "/amount-config",
     },
     {
       icon: <i className="ri-settings-3-fill text-white"></i>,
@@ -142,7 +160,8 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
             {item.dropdown ? (
               <>
                 <div
- className="flex items-center py-3 px-4 font-semibold text-sm text-white mx-4 rounded-lg cursor-pointer no-underline"                  onClick={() => toggleDropdown(item.name)}
+                  className="flex items-center py-3 px-4 font-semibold text-sm text-white mx-4 rounded-lg cursor-pointer no-underline"
+                  onClick={() => toggleDropdown(item.name)}
                 >
                   <span className="text-xl">{item.icon}</span>
                   <span className={`ml-4 ${isCollapsed && !isMobile ? "hidden" : "block"}`}>
