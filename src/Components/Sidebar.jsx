@@ -90,6 +90,13 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
         { name: "Get All Logos", path: "/logolist" },
       ],
     },
+     {
+      icon: <i className="ri-palette-fill text-white"></i>,
+      name: "Business Cards",
+      dropdown: [
+        { name: "Business Cards", path: "/business" },
+      ],
+    },
     {
       icon: <i className="ri-sticker-fill text-white"></i>,
       name: "Stickers",

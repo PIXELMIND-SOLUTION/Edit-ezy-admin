@@ -96,6 +96,7 @@ import StickerCategoryManagement from "./Pages/StickerCategoryManagement.js";
 import StickerManagement from "./Pages/StickerManagement.js";
 import WalletSettings from "./Pages/WalletSettings.js";
 import AmountSettings from "./Pages/AmountSettings.js";
+import BusinessCardCreator from "./Pages/BusinessCardCreator.js";
 
 
 
@@ -206,6 +207,7 @@ function App() {
               <Route path="/create-sticker" element={<StickerManagement />} />
                <Route path="/userwallet" element={<WalletSettings />} />
               <Route path="/amount-config" element={<AmountSettings />} />
+              <Route path="/business" element={<BusinessCardCreator />} />
 
 
 
