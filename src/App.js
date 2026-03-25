@@ -80,7 +80,6 @@ import AboutUsFormPage from "./Pages/AboutUsFormPage.js";
 import GetAboutUsPage from "./Pages/GetAboutUsPage.js";
 import ContactUsPage from "./Pages/ContactUsPage.js";
 import GetContactUsPage from "./Pages/GetContactUsPage.js";
-import BusinessPosterList from "./Pages/BusinessPosterList.js";
 import RegisterPage from "./Pages/Register.js";
 import GetProfilePage from "./Pages/GetProfilePage.js";
 import CreatePosterForm from "./Pages/CreatePosterForm.js";
@@ -97,6 +96,7 @@ import StickerManagement from "./Pages/StickerManagement.js";
 import WalletSettings from "./Pages/WalletSettings.js";
 import AmountSettings from "./Pages/AmountSettings.js";
 import BusinessCardCreator from "./Pages/BusinessCardCreator.js";
+import BusinessCardList from "./Pages/BusinessCardList.js";
 
 
 
@@ -183,7 +183,6 @@ function App() {
               <Route path="/logolist" element={<LogoList />} />
               <Route path="/create-logocategory" element={<LogoCategoryManagement />} />
               <Route path="/create-businesscard" element={<CreateBusinessCard />} />
-              <Route path="/businesscardlist" element={<BusinessPosterList />} />
               <Route path="/create-plan" element={<CreatePlan />} />
               <Route path="/planlist" element={<PlanList />} />
               <Route path="/userplanlist" element={<UsersPlansList />} />
@@ -208,6 +207,7 @@ function App() {
                <Route path="/userwallet" element={<WalletSettings />} />
               <Route path="/amount-config" element={<AmountSettings />} />
               <Route path="/business" element={<BusinessCardCreator />} />
+              <Route path="/businesscardlist" element={<BusinessCardList />} />
 
 
 

@@ -52,6 +52,23 @@ import {
 } from 'react-icons/fa';
 import html2canvas from 'html2canvas';
 
+// Function to convert image URL to base64 to avoid CORS
+const getBase64FromUrl = async (url) => {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Error converting image to base64:', error);
+    return null;
+  }
+};
+
 const BusinessCardCreator = () => {
   const [activeTab, setActiveTab] = useState('1');
   const [loading, setLoading] = useState(false);
@@ -59,7 +76,8 @@ const BusinessCardCreator = () => {
   const [successMessage, setSuccessMessage] = useState('');
   
   // Templates
-  const [templateImage, setTemplateImage] = useState(null);
+  const [templateImage, setTemplateImage] = useState(null); // Original uploaded template (no overlay)
+  const [originalTemplateFile, setOriginalTemplateFile] = useState(null); // Store original file
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   
   // Logo settings
@@ -71,7 +89,7 @@ const BusinessCardCreator = () => {
     borderRadius: 8,
     borderWidth: 0,
     borderColor: '#000000',
-    shape: 'rectangle' // rectangle, circle, rounded
+    shape: 'rectangle'
   });
   
   // Card Data
@@ -109,12 +127,12 @@ const BusinessCardCreator = () => {
     website: { fontSize: 12, fontWeight: 'normal', color: '#666666', italic: false, underline: false, x: 50, y: 340 }
   });
   
-  // Social Links with real image URLs
+  // Social Links with real icons
   const [socialLinks, setSocialLinks] = useState([
-    { id: 'fb1', platform: 'facebook', url: '', iconUrl: 'https://cdn-icons-png.flaticon.com/128/5968/5968764.png', iconName: 'Facebook', color: '#1877f2', x: 50, y: 400, iconSize: 30, showUrl: true, urlColor: '#666666', urlFontSize: 12 },
-    { id: 'ig1', platform: 'instagram', url: '', iconUrl: 'https://cdn-icons-png.flaticon.com/128/4138/4138124.png', iconName: 'Instagram', color: '#e4405f', x: 50, y: 440, iconSize: 30, showUrl: true, urlColor: '#666666', urlFontSize: 12 },
-    { id: 'tw1', platform: 'twitter', url: '', iconUrl: 'https://cdn-icons-png.flaticon.com/128/5969/5969020.png', iconName: 'Twitter', color: '#1da1f2', x: 50, y: 480, iconSize: 30, showUrl: true, urlColor: '#666666', urlFontSize: 12 },
-    { id: 'li1', platform: 'linkedin', url: '', iconUrl: 'https://cdn-icons-png.flaticon.com/128/3536/3536505.png', iconName: 'LinkedIn', color: '#0077b5', x: 50, y: 520, iconSize: 30, showUrl: true, urlColor: '#666666', urlFontSize: 12 }
+    { id: 'fb1', platform: 'facebook', url: '', iconUrl: 'https://cdn-icons-png.flaticon.com/128/5968/5968764.png', iconBase64: '', iconName: 'Facebook', color: '#1877f2', x: 50, y: 400, iconSize: 30, showUrl: true, urlColor: '#666666', urlFontSize: 12 },
+    { id: 'ig1', platform: 'instagram', url: '', iconUrl: 'https://cdn-icons-png.flaticon.com/128/4138/4138124.png', iconBase64: '', iconName: 'Instagram', color: '#e4405f', x: 50, y: 440, iconSize: 30, showUrl: true, urlColor: '#666666', urlFontSize: 12 },
+    { id: 'tw1', platform: 'twitter', url: '', iconUrl: 'https://cdn-icons-png.flaticon.com/128/5969/5969020.png', iconBase64: '', iconName: 'Twitter', color: '#1da1f2', x: 50, y: 480, iconSize: 30, showUrl: true, urlColor: '#666666', urlFontSize: 12 },
+    { id: 'li1', platform: 'linkedin', url: '', iconUrl: 'https://cdn-icons-png.flaticon.com/128/3536/3536505.png', iconBase64: '', iconName: 'LinkedIn', color: '#0077b5', x: 50, y: 520, iconSize: 30, showUrl: true, urlColor: '#666666', urlFontSize: 12 }
   ]);
   
   const [previewImage, setPreviewImage] = useState(null);
@@ -124,6 +142,7 @@ const BusinessCardCreator = () => {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [selectedElement, setSelectedElement] = useState('name');
   const [selectedSocial, setSelectedSocial] = useState(null);
+  const [iconsLoaded, setIconsLoaded] = useState(false);
   
   const fileInputRef = useRef(null);
   const logoInputRef = useRef(null);
@@ -132,8 +151,8 @@ const BusinessCardCreator = () => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
   const cardRef = useRef(null);
+  const templateCanvasRef = useRef(null); // Separate canvas for template display
 
-  // Available social platforms with real icons
   const availablePlatforms = [
     { name: 'facebook', iconUrl: 'https://cdn-icons-png.flaticon.com/128/5968/5968764.png', color: '#1877f2' },
     { name: 'instagram', iconUrl: 'https://cdn-icons-png.flaticon.com/128/4138/4138124.png', color: '#e4405f' },
@@ -145,6 +164,24 @@ const BusinessCardCreator = () => {
     { name: 'website', iconUrl: 'https://cdn-icons-png.flaticon.com/128/3135/3135715.png', color: '#6c757d' }
   ];
 
+  // Load icons as base64 to avoid CORS
+  useEffect(() => {
+    const loadIconsAsBase64 = async () => {
+      const updatedLinks = [...socialLinks];
+      for (let i = 0; i < updatedLinks.length; i++) {
+        if (updatedLinks[i].iconUrl && !updatedLinks[i].iconBase64) {
+          const base64 = await getBase64FromUrl(updatedLinks[i].iconUrl);
+          if (base64) {
+            updatedLinks[i].iconBase64 = base64;
+          }
+        }
+      }
+      setSocialLinks(updatedLinks);
+      setIconsLoaded(true);
+    };
+    loadIconsAsBase64();
+  }, []);
+
   const addSocialLink = () => {
     const newId = `social_${Date.now()}`;
     setSocialLinks([...socialLinks, { 
@@ -152,6 +189,7 @@ const BusinessCardCreator = () => {
       platform: 'website', 
       url: '', 
       iconUrl: 'https://cdn-icons-png.flaticon.com/128/3135/3135715.png',
+      iconBase64: '',
       iconName: 'Website',
       color: '#6c757d', 
       x: 50, 
@@ -172,11 +210,13 @@ const BusinessCardCreator = () => {
     setSocialLinks(socialLinks.map(s => s.id === id ? { ...s, [field]: value } : s));
   };
 
-  const changeSocialPlatform = (id, platform) => {
+  const changeSocialPlatform = async (id, platform) => {
+    const base64 = await getBase64FromUrl(platform.iconUrl);
     setSocialLinks(socialLinks.map(s => s.id === id ? { 
       ...s, 
       platform: platform.name,
       iconUrl: platform.iconUrl,
+      iconBase64: base64 || '',
       iconName: platform.name.charAt(0).toUpperCase() + platform.name.slice(1),
       color: platform.color
     } : s));
@@ -208,7 +248,6 @@ const BusinessCardCreator = () => {
     setLogoSettings(prev => ({ ...prev, width, height }));
   };
 
-  // Get logo shape style
   const getLogoShapeStyle = () => {
     if (logoSettings.shape === 'circle') {
       return { borderRadius: '50%' };
@@ -218,27 +257,28 @@ const BusinessCardCreator = () => {
     return { borderRadius: '0' };
   };
 
-  // Draw canvas with all elements
+  // Draw canvas with all overlays (for preview)
   useEffect(() => {
-    if (cardData.useTemplate && templateImage && canvasRef.current) {
-      drawCanvas();
+    if (cardData.useTemplate && templateImage && canvasRef.current && iconsLoaded) {
+      drawCanvasWithOverlays();
     }
-  }, [templateImage, cardData, textStyles, socialLinks, previewImage, logoSettings]);
+  }, [templateImage, cardData, textStyles, socialLinks, previewImage, logoSettings, iconsLoaded]);
 
-  const drawCanvas = () => {
+  const drawCanvasWithOverlays = () => {
     if (!canvasRef.current || !templateImage) return;
     
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const img = new Image();
     
+    img.crossOrigin = 'Anonymous';
     img.onload = () => {
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0, img.width, img.height);
       
-      // Draw all text fields
+      // Draw text fields
       const fields = ['name', 'title', 'company', 'email', 'phone', 'address', 'website'];
       fields.forEach(field => {
         const style = textStyles[field];
@@ -261,29 +301,29 @@ const BusinessCardCreator = () => {
         }
       });
       
-      // Draw social icons with real images
+      // Draw social icons
       socialLinks.forEach((social) => {
-        if (social.url && social.url.trim() !== '') {
+        if (social.url && social.url.trim() !== '' && social.iconBase64) {
           const socialImg = new Image();
           socialImg.onload = () => {
             ctx.drawImage(socialImg, social.x - social.iconSize/2, social.y - social.iconSize/2, social.iconSize, social.iconSize);
           };
-          socialImg.src = social.iconUrl;
+          socialImg.src = social.iconBase64;
           
-          // Draw URL next to icon
           if (social.showUrl) {
             ctx.fillStyle = social.urlColor;
             ctx.font = `${social.urlFontSize}px ${cardData.fontFamily}`;
             let displayUrl = social.url;
             if (displayUrl.length > 35) displayUrl = displayUrl.substring(0, 32) + '...';
-            ctx.fillText(displayUrl, social.x + social.iconSize/2 + 5, social.y + 5);
+            ctx.fillText(displayUrl, social.x + social.iconSize/2 + 8, social.y + 5);
           }
         }
       });
       
-      // Draw logo with customization
+      // Draw logo
       if (cardData.showLogo && previewImage) {
         const logo = new Image();
+        logo.crossOrigin = 'Anonymous';
         logo.onload = () => {
           ctx.save();
           if (logoSettings.borderWidth > 0) {
@@ -291,7 +331,6 @@ const BusinessCardCreator = () => {
             ctx.lineWidth = logoSettings.borderWidth;
           }
           
-          // Apply shape
           if (logoSettings.shape === 'circle') {
             ctx.beginPath();
             ctx.arc(logoSettings.x + logoSettings.width/2, logoSettings.y + logoSettings.height/2, logoSettings.width/2, 0, 2 * Math.PI);
@@ -324,7 +363,7 @@ const BusinessCardCreator = () => {
     img.src = templateImage;
   };
 
-  // Add roundRect helper
+  // RoundRect helper
   if (!CanvasRenderingContext2D.prototype.roundRect) {
     CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
       if (w < 2 * r) r = w / 2;
@@ -352,7 +391,6 @@ const BusinessCardCreator = () => {
     const mouseX = (e.clientX - rect.left) * scaleX;
     const mouseY = (e.clientY - rect.top) * scaleY;
     
-    // Check text fields
     const fields = ['name', 'title', 'company', 'email', 'phone', 'address', 'website'];
     for (const field of fields) {
       const style = textStyles[field];
@@ -378,7 +416,6 @@ const BusinessCardCreator = () => {
       }
     }
     
-    // Check social icons
     for (let i = 0; i < socialLinks.length; i++) {
       const social = socialLinks[i];
       if (social.url && social.url.trim() !== '') {
@@ -392,7 +429,6 @@ const BusinessCardCreator = () => {
       }
     }
     
-    // Check logo
     if (cardData.showLogo && previewImage) {
       if (mouseX >= logoSettings.x && mouseX <= logoSettings.x + logoSettings.width &&
           mouseY >= logoSettings.y && mouseY <= logoSettings.y + logoSettings.height) {
@@ -449,6 +485,7 @@ const BusinessCardCreator = () => {
       }
       const imageUrl = URL.createObjectURL(file);
       setTemplateImage(imageUrl);
+      setOriginalTemplateFile(file); // Store original file for backend
       setCardData({ ...cardData, useTemplate: true });
       setShowTemplatePicker(false);
     }
@@ -456,6 +493,7 @@ const BusinessCardCreator = () => {
 
   const selectTemplate = (template) => {
     setTemplateImage(template.image);
+    setOriginalTemplateFile(null); // Sample template, no file
     setCardData({ ...cardData, useTemplate: true });
     setShowTemplatePicker(false);
   };
@@ -486,37 +524,47 @@ const BusinessCardCreator = () => {
       link.href = canvasRef.current.toDataURL('image/png');
       link.click();
     } else if (cardRef.current) {
-      const canvas = await html2canvas(cardRef.current, { scale: 2, backgroundColor: null });
-      const link = document.createElement('a');
-      link.download = `${cardData.name.replace(/\s/g, '_')}_business_card.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      try {
+        const canvas = await html2canvas(cardRef.current, { 
+          scale: 2, 
+          backgroundColor: null,
+          useCORS: true,
+          logging: false 
+        });
+        const link = document.createElement('a');
+        link.download = `${cardData.name.replace(/\s/g, '_')}_business_card.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (error) {
+        console.error('Error downloading card:', error);
+        setErrorMessage('Failed to download card');
+      }
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage('');
     
     const formData = new FormData();
+    
+    // Basic Info
     formData.append('name', cardData.name);
     formData.append('title', cardData.title);
-    formData.append('company', cardData.company);
-    formData.append('email', cardData.email);
-    formData.append('phone', cardData.phone);
-    formData.append('address', cardData.address);
-    formData.append('website', cardData.website);
+    formData.append('company', cardData.company || '');
+    formData.append('email', cardData.email || '');
+    formData.append('phone', cardData.phone || '');
+    formData.append('address', cardData.address || '');
+    formData.append('website', cardData.website || '');
+    
+    // Settings
     formData.append('socialLinks', JSON.stringify(socialLinks));
     formData.append('textStyles', JSON.stringify(textStyles));
     formData.append('logoSettings', JSON.stringify(logoSettings));
     formData.append('useTemplate', cardData.useTemplate);
     
-    if (templateImage && cardData.useTemplate) {
-      const canvas = canvasRef.current;
-      const blob = await new Promise(resolve => canvas.toBlob(resolve));
-      formData.append('templateImage', blob);
-    }
-    
+    // Design
     formData.append('design', JSON.stringify({
       backgroundColor: cardData.backgroundColor,
       textColor: cardData.textColor,
@@ -530,14 +578,62 @@ const BusinessCardCreator = () => {
       border: cardData.border
     }));
     
-    if (cardData.logo) formData.append('logo', cardData.logo);
-    if (cardData.qrCode) formData.append('qrCode', cardData.qrCode);
+    // Files
+    if (cardData.logo) {
+      formData.append('logo', cardData.logo);
+    }
+    if (cardData.qrCode) {
+      formData.append('qrCode', cardData.qrCode);
+    }
+    
+    // Upload ORIGINAL TEMPLATE (without any overlays)
+    if (originalTemplateFile) {
+      // User uploaded custom template - send original file
+      formData.append('templateImage', originalTemplateFile);
+    } else if (templateImage && cardData.useTemplate) {
+      // Sample template - convert to blob
+      const response = await fetch(templateImage);
+      const blob = await response.blob();
+      formData.append('templateImage', blob, 'template.png');
+    }
+    
+    // Capture PREVIEW IMAGE (with all overlays)
+    if (cardData.useTemplate && canvasRef.current && templateImage) {
+      try {
+        const canvas = canvasRef.current;
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        formData.append('previewImage', blob); // Final card with all overlays
+      } catch (err) {
+        console.error('Error capturing preview:', err);
+      }
+    } else if (cardRef.current) {
+      try {
+        const canvas = await html2canvas(cardRef.current, { scale: 2, backgroundColor: null, useCORS: true });
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        formData.append('previewImage', blob);
+      } catch (err) {
+        console.error('Error capturing card:', err);
+      }
+    }
     
     try {
-      await axios.post('http://localhost:4061/api/admin/createbusinesscard', formData);
+      const response = await axios.post(
+        'http://localhost:4061/api/admin/createbusinesscard',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        }
+      );
+      
+      console.log('Response:', response.data);
       setSuccessMessage('Business card created successfully!');
-      setTimeout(() => navigate('/businesscards'), 2000);
+      
+      setTimeout(() => {
+        navigate('/businesscardslist');
+      }, 2000);
+      
     } catch (error) {
+      console.error('Error:', error);
       setErrorMessage(error.response?.data?.message || 'Error creating business card');
     } finally {
       setLoading(false);
@@ -601,8 +697,9 @@ const BusinessCardCreator = () => {
           <div style={{ borderTop: `1px solid ${cardData.accentColor}30`, margin: '12px 0', paddingTop: '12px' }}>
             {socialLinks.filter(s => s.url && s.url.trim() !== '').map((social) => (
               <div key={social.id} className="d-flex align-items-center gap-2 mb-2">
-                <a href={social.url.startsWith('http') ? social.url : `https://${social.url}`} target="_blank" rel="noopener noreferrer">
-                  <img src={social.iconUrl} alt={social.iconName} style={{ width: `${social.iconSize}px`, height: `${social.iconSize}px` }} />
+                <img src={social.iconBase64 || social.iconUrl} alt={social.iconName} style={{ width: `${social.iconSize}px`, height: `${social.iconSize}px` }} />
+                <a href={social.url.startsWith('http') ? social.url : `https://${social.url}`} target="_blank" rel="noopener noreferrer" style={{ color: social.color }}>
+                  {social.url}
                 </a>
                 {social.showUrl && (
                   <span style={{ fontSize: `${social.urlFontSize}px`, color: social.urlColor, wordBreak: 'break-all' }}>{social.url}</span>
@@ -689,12 +786,12 @@ const BusinessCardCreator = () => {
 
                   {/* Social Media Tab */}
                   <TabPane tabId="2">
-                    {socialLinks.map((social, idx) => (
+                    {socialLinks.map((social) => (
                       <Card key={social.id} className="mb-2">
                         <CardBody className="p-3">
                           <div className="d-flex justify-content-between align-items-center mb-2">
                             <div className="d-flex align-items-center gap-2">
-                              <img src={social.iconUrl} alt={social.iconName} style={{ width: '30px', height: '30px' }} />
+                              <img src={social.iconBase64 || social.iconUrl} alt={social.iconName} style={{ width: '30px', height: '30px' }} />
                               <strong>{social.iconName}</strong>
                               {social.url && <Badge color="success" pill className="ms-2">✓ Active</Badge>}
                             </div>
@@ -880,7 +977,7 @@ const BusinessCardCreator = () => {
                 </TabContent>
 
                 <div className="d-flex justify-content-end gap-2 mt-4">
-                  <Button color="secondary" onClick={() => navigate('/businesscards')}>Cancel</Button>
+                  <Button color="secondary" onClick={() => navigate('/businesscardslist')}>Cancel</Button>
                   <Button color="primary" type="submit" disabled={loading}>
                     {loading ? <><FaSpinner className="spinner-border-sm me-1" /> Creating...</> : <><FaSave /> Create Card</>}
                   </Button>
