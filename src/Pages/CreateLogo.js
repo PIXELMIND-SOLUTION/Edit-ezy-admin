@@ -64,7 +64,7 @@ const CreateLogo = () => {
   const fetchLogoCategories = async () => {
     setCategoriesLoading(true);
     try {
-      const response = await axios.get('http://localhost:4061/api/admin/getlogocategories');
+      const response = await axios.get('http://31.97.206.144:4061/api/admin/getlogocategories');
       console.log('Categories response:', response.data);
       
       // Handle different response structures
@@ -355,7 +355,7 @@ const CreateLogo = () => {
 
     try {
       const response = await axios.post(
-        'http://localhost:4061/api/admin/createlogo',
+        'http://31.97.206.144:4061/api/admin/createlogo',
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },

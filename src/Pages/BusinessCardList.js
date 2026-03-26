@@ -31,7 +31,7 @@ export default function BusinessCardList() {
   const fetchBusinessCards = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:4061/api/admin/getbusinesscards");
+      const res = await axios.get("http://31.97.206.144:4061/api/admin/getbusinesscards");
       console.log("Business cards:", res.data);
       setBusinessCards(res.data.data || res.data || []);
     } catch (error) {
@@ -45,7 +45,7 @@ export default function BusinessCardList() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this business card?")) return;
     try {
-      await axios.delete(`http://localhost:4061/api/admin/deletebusinesscard/${id}`);
+      await axios.delete(`http://31.97.206.144:4061/api/admin/deletebusinesscard/${id}`);
       fetchBusinessCards();
       alert("Business card deleted successfully!");
     } catch (error) {
@@ -63,7 +63,7 @@ export default function BusinessCardList() {
   const handleUpdate = async () => {
     try {
       const response = await axios.put(
-        `http://localhost:4061/api/admin/updatebusinesscard/${editData._id}`,
+        `http://31.97.206.144:4061/api/admin/updatebusinesscard/${editData._id}`,
         editData
       );
       if (response.data.success) {

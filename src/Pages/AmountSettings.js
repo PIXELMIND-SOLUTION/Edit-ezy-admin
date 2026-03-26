@@ -47,6 +47,7 @@ const AmountSettings = () => {
     'Logo',
     'Reels',
     'Stickers',
+    'Business Card',
   ];
 
   // Alert states
@@ -212,6 +213,8 @@ const AmountSettings = () => {
         return 'ri-video-fill';
       case 'Stickers':
         return 'ri-sticker-fill';
+      case 'Business Card':
+        return 'ri-id-card-fill';
       case 'Audio':
         return 'ri-music-fill';
       case 'Banner':
@@ -224,117 +227,112 @@ const AmountSettings = () => {
   };
 
   return (
-    <>
-      <Container fluid className="py-4">
-        {/* Alert */}
-        {alert.show && (
-          <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1050 }}>
-            <Alert 
-              color={alert.type} 
-              className="shadow-lg"
-              toggle={() => setAlert({ show: false, message: '', type: 'success' })}
-            >
-              {alert.message}
-            </Alert>
-          </div>
-        )}
+    <Container fluid className="py-4">
+      {/* Alert */}
+      {alert.show && (
+        <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 1050 }}>
+          <Alert 
+            color={alert.type} 
+            className="shadow-lg"
+            toggle={() => setAlert({ show: false, message: '', type: 'success' })}
+          >
+            {alert.message}
+          </Alert>
+        </div>
+      )}
 
-        {/* Header */}
-        <Row className="mb-4">
-          <Col>
-            <div className="d-flex justify-content-between align-items-center">
-              <div>
-                <h2 className="mb-1">
-                  <FaMoneyBillWave className="me-2 text-success" />
-                  Amount Configuration
-                </h2>
-                <p className="text-muted mb-0">Manage amount configurations for different modules</p>
-              </div>
-              <Button color="primary" onClick={() => setAddModalOpen(true)}>
-                <FaPlus className="me-2" />
-                Add Config
-              </Button>
+      {/* Header */}
+      <Row className="mb-4">
+        <Col>
+          <div className="d-flex justify-content-between align-items-center">
+            <div>
+              <h2 className="mb-1">
+                <FaMoneyBillWave className="me-2 text-success" />
+                Amount Configuration
+              </h2>
+              <p className="text-muted mb-0">Manage amount configurations for different modules</p>
             </div>
-          </Col>
-        </Row>
+            <Button color="primary" onClick={() => setAddModalOpen(true)}>
+              <FaPlus className="me-2" />
+              Add Config
+            </Button>
+          </div>
+        </Col>
+      </Row>
 
-        <Row>
-          <Col lg={10} className="mx-auto">
-            <Card className="shadow-sm">
-              <CardBody>
-                {fetchLoading ? (
-                  <div className="text-center py-5">
-                    <div className="spinner-border text-primary" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                    <p className="mt-3 text-muted">Loading configurations...</p>
+      <Row>
+        <Col lg={10} className="mx-auto">
+          <Card className="shadow-sm">
+            <CardBody>
+              {fetchLoading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Loading...</span>
                   </div>
-                ) : (
-                  <>
-                    {/* Table View */}
-                    <Table bordered hover responsive>
-                      <thead className="bg-light">
-                        <tr>
-                          <th>#</th>
-                          <th>Name</th>
-                          <th>Amount</th>
-                          <th className="text-center">Actions</th>
+                  <p className="mt-3 text-muted">Loading configurations...</p>
+                </div>
+              ) : (
+                <Table bordered hover responsive>
+                  <thead className="bg-light">
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Amount</th>
+                      <th className="text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {amounts.length > 0 ? (
+                      amounts.map((item, index) => (
+                        <tr key={item._id}>
+                          <td>{index + 1}</td>
+                          <td className="fw-bold">
+                            <i className={`${getIcon(item.name)} me-2 text-primary`}></i>
+                            {item.name}
+                          </td>
+                          <td>
+                            <FaMoneyBillWave className="me-2 text-success" />
+                            ₹ {formatAmount(item.amount)}
+                          </td>
+                          <td className="text-center">
+                            <Button
+                              color="warning"
+                              size="sm"
+                              className="me-2"
+                              onClick={() => handleEdit(item)}
+                              title="Edit Config"
+                            >
+                              <FaEdit />
+                            </Button>
+                            <Button
+                              color="danger"
+                              size="sm"
+                              onClick={() => {
+                                setEditId(item._id);
+                                setDeleteModalOpen(true);
+                              }}
+                              title="Delete Config"
+                            >
+                              <FaTrash />
+                            </Button>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {amounts.length > 0 ? (
-                          amounts.map((item, index) => (
-                            <tr key={item._id}>
-                              <td>{index + 1}</td>
-                              <td className="fw-bold">
-                                <i className={`${getIcon(item.name)} me-2 text-primary`}></i>
-                                {item.name}
-                              </td>
-                              <td>
-                                <FaMoneyBillWave className="me-2 text-success" />
-                                ₹ {formatAmount(item.amount)}
-                              </td>
-                              <td className="text-center">
-                                <Button
-                                  color="warning"
-                                  size="sm"
-                                  className="me-2"
-                                  onClick={() => handleEdit(item)}
-                                  title="Edit Config"
-                                >
-                                  <FaEdit />
-                                </Button>
-                                <Button
-                                  color="danger"
-                                  size="sm"
-                                  onClick={() => {
-                                    setEditId(item._id);
-                                    setDeleteModalOpen(true);
-                                  }}
-                                  title="Delete Config"
-                                >
-                                  <FaTrash />
-                                </Button>
-                              </td>
-                            </tr>
-                          ))
-                        ) : (
-                          <tr>
-                            <td colSpan="4" className="text-center py-4">
-                              <FaMoneyBillWave size={32} className="text-muted mb-2" />
-                              <p className="text-muted mb-0">No configurations found</p>
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </Table>
-                  </>
-                )}
-              </CardBody>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" className="text-center py-4">
+                          <FaMoneyBillWave size={32} className="text-muted mb-2" />
+                          <p className="text-muted mb-0">No configurations found</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </Table>
+              )}
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
 
       {/* Add Modal */}
       <Modal isOpen={addModalOpen} toggle={() => setAddModalOpen(false)} centered>
@@ -498,7 +496,7 @@ const AmountSettings = () => {
           </Button>
         </ModalFooter>
       </Modal>
-    </>
+    </Container>
   );
 };
 

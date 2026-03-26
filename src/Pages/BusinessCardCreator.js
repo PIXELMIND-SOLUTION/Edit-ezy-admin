@@ -618,7 +618,7 @@ const BusinessCardCreator = () => {
     
     try {
       const response = await axios.post(
-        'http://localhost:4061/api/admin/createbusinesscard',
+        'http://31.97.206.144:4061/api/admin/createbusinesscard',
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' }

@@ -97,6 +97,7 @@ import WalletSettings from "./Pages/WalletSettings.js";
 import AmountSettings from "./Pages/AmountSettings.js";
 import BusinessCardCreator from "./Pages/BusinessCardCreator.js";
 import BusinessCardList from "./Pages/BusinessCardList.js";
+import CelebrationManager from "./Pages/CelebrationManager.js";
 
 
 
@@ -208,6 +209,7 @@ function App() {
               <Route path="/amount-config" element={<AmountSettings />} />
               <Route path="/business" element={<BusinessCardCreator />} />
               <Route path="/businesscardlist" element={<BusinessCardList />} />
+              <Route path="/celebration" element={<CelebrationManager />} />
 
 
 

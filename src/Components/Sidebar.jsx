@@ -12,16 +12,9 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
 
   const handleLogout = async () => {
     try {
-      // Get API URL based on environment
       const apiUrl = process.env.REACT_APP_API_URL || "http://31.97.206.144:4061";
-
-      // Make the POST request to the logout API
       await axios.post(`${apiUrl}/api/admin/logout`, {}, { withCredentials: true });
-
-      // Remove the token from localStorage
       localStorage.removeItem("authToken");
-
-      // Alert the user and redirect to login
       alert("Logout successful");
       window.location.href = "/";
     } catch (error) {
@@ -107,6 +100,13 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
         { name: "Get All Stickers", path: "/stickerlist" },
       ],
     },
+     {
+      icon: <i className="ri-gift-fill text-white"></i>,
+      name: "Celebration",
+      dropdown: [
+        { name: "Celebration", path: "/celebration" },
+      ],
+    },
     {
       icon: <i className="ri-gallery-fill text-white"></i>,
       name: "Banners",
@@ -156,54 +156,68 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
 
   return (
     <div
-      className={`transition-all duration-300 ${isMobile ? (isCollapsed ? "w-0" : "w-64") : isCollapsed ? "w-16" : "w-64"} h-screen overflow-y-scroll no-scrollbar flex flex-col bg-gradient-to-b from-gray-800 to-blue-800`}
+      className={`transition-all duration-500 ${
+        isMobile ? (isCollapsed ? "w-0" : "w-64") : isCollapsed ? "w-16" : "w-64"
+      } h-screen overflow-y-auto no-scrollbar flex flex-col backdrop-blur-xl bg-white/10 border-r border-white/20 shadow-2xl`}
+      style={{
+        background: "linear-gradient(135deg, rgba(31, 41, 55, 0.95), rgba(59, 130, 246, 0.85))",
+        backdropFilter: "blur(12px)",
+      }}
     >
-      <div className="sticky top-0 p-4 font-bold text-white flex justify-center text-xl bg-[#1F2937] border-b border-gray-700">
-        <span>Admin Panel</span>
+      <div className="sticky top-0 z-10 p-4 font-bold text-white flex justify-center text-xl bg-white/10 backdrop-blur-lg border-b border-white/20 shadow-lg">
+        <span className="tracking-wider">Admin Panel</span>
       </div>
 
-      <nav className={`flex flex-col ${isCollapsed && "items-center"} space-y-4 mt-4`}>
+      <nav className={`flex flex-col ${isCollapsed && "items-center"} space-y-2 mt-4 px-3 pb-6`}>
         {elements.map((item, idx) => (
-          <div key={idx}>
+          <div key={idx} className="w-full">
             {item.dropdown ? (
               <>
                 <div
-                  className="flex items-center py-3 px-4 font-semibold text-sm text-white mx-4 rounded-lg cursor-pointer no-underline"
+                  className="group flex items-center py-3 px-3 font-medium text-sm text-white rounded-xl cursor-pointer transition-all duration-300 backdrop-blur-sm hover:bg-white/20 hover:shadow-lg hover:scale-[1.02]"
                   onClick={() => toggleDropdown(item.name)}
                 >
-                  <span className="text-xl">{item.icon}</span>
-                  <span className={`ml-4 ${isCollapsed && !isMobile ? "hidden" : "block"}`}>
+                  <span className="text-xl group-hover:scale-110 transition-transform duration-300">{item.icon}</span>
+                  <span className={`ml-3 flex-1 ${isCollapsed && !isMobile ? "hidden" : "block"} tracking-wide`}>
                     {item.name}
                   </span>
                   <FaChevronDown
-                    className={`ml-auto text-xs transform ${openDropdown === item.name ? "rotate-180" : "rotate-0"}`}
+                    className={`text-xs transition-all duration-300 ${
+                      openDropdown === item.name ? "rotate-180" : "rotate-0"
+                    } ${isCollapsed && !isMobile ? "hidden" : "block"}`}
                   />
                 </div>
-                {openDropdown === item.name && (
-                  <ul className="ml-10 text-sm text-white">
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openDropdown === item.name ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <ul className={`ml-8 mt-1 space-y-1 ${isCollapsed && !isMobile ? "ml-0" : ""}`}>
                     {item.dropdown.map((subItem, subIdx) => (
                       <li key={subIdx}>
                         <Link
                           to={subItem.path}
-                          className="flex items-center space-x-2 py-2 font-medium cursor-pointer hover:text-[#00B074] hover:underline"
+                          className="flex items-center space-x-2 py-2 px-2 font-medium text-white/80 rounded-lg transition-all duration-300 hover:bg-white/20 hover:text-white hover:translate-x-1"
                           onClick={() => setOpenDropdown(null)}
+                          style={{ textDecoration: "none" }}
                         >
-                          <span className="text-[#00B074]">•</span>
-                          <span>{subItem.name}</span>
+                          <span className="text-sm opacity-70">✦</span>
+                          <span className="text-sm" style={{ textDecoration: "none" }}>{subItem.name}</span>
                         </Link>
                       </li>
                     ))}
                   </ul>
-                )}
+                </div>
               </>
             ) : (
               <Link
                 to={item.path}
-                className="flex items-center py-3 px-4 font-semibold text-sm text-white mx-4 rounded-lg hover:bg-gray-700 hover:text-[#00B074] duration-300 cursor-pointer"
+                className="group flex items-center py-3 px-3 font-medium text-sm text-white rounded-xl transition-all duration-300 backdrop-blur-sm hover:bg-white/20 hover:shadow-lg hover:scale-[1.02]"
                 onClick={item.action ? item.action : null}
+                style={{ textDecoration: "none" }}
               >
-                <span className="text-xl">{item.icon}</span>
-                <span className={`ml-4 ${isCollapsed && !isMobile ? "hidden" : "block"}`}>
+                <span className="text-xl group-hover:scale-110 transition-transform duration-300">{item.icon}</span>
+                <span className={`ml-3 ${isCollapsed && !isMobile ? "hidden" : "block"} tracking-wide`} style={{ textDecoration: "none" }}>
                   {item.name}
                 </span>
               </Link>
@@ -211,6 +225,31 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
           </div>
         ))}
       </nav>
+
+      <style jsx>{`
+        /* Remove all underlines from links */
+        a {
+          text-decoration: none !important;
+        }
+        a:hover {
+          text-decoration: none !important;
+        }
+        /* Custom scrollbar for glassmorphism */
+        .no-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .no-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 10px;
+        }
+        .no-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.3);
+          border-radius: 10px;
+        }
+        .no-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.5);
+        }
+      `}</style>
     </div>
   );
 };
