@@ -5,12 +5,14 @@ import {
   Spinner, Alert, Badge
 } from 'reactstrap';
 import axios from 'axios';
-import { FaTrash, FaEdit, FaUpload, FaPlay, FaHeart, FaRegHeart, FaFire } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaUpload, FaPlay, FaHeart, FaRegHeart, FaFire, FaImage } from 'react-icons/fa';
 
 const ManageReels = () => {
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState(null);
-  const [hotTop, setHotTop] = useState(false); // ✅ HotTop state for create form
+  const [thumbnailFile, setThumbnailFile] = useState(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [hotTop, setHotTop] = useState(false);
   const [reels, setReels] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -18,16 +20,18 @@ const ManageReels = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  // ✅ Edit Modal State
+  // Edit Modal State
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editVideoFile, setEditVideoFile] = useState(null);
   const [editVideoPreview, setEditVideoPreview] = useState(null);
+  const [editThumbnailFile, setEditThumbnailFile] = useState(null);
+  const [editThumbnailPreview, setEditThumbnailPreview] = useState(null);
   const [editId, setEditId] = useState(null);
   const [editLikeCount, setEditLikeCount] = useState(0);
   const [editIsLiked, setEditIsLiked] = useState(false);
   const [editHotTop, setEditHotTop] = useState(false);
 
-  // ✅ Video Modal State
+  // Video Modal State
   const [videoModal, setVideoModal] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState(null);
 
@@ -78,6 +82,24 @@ const ManageReels = () => {
     setError(null);
   };
 
+  const handleThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.includes('image/')) {
+      setError('Please select an image file for thumbnail');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Maximum thumbnail size is 5MB');
+      return;
+    }
+
+    setThumbnailFile(file);
+    setThumbnailPreview(URL.createObjectURL(file));
+    setError(null);
+  };
+
   const handleEditVideoChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -96,10 +118,35 @@ const ManageReels = () => {
     setError(null);
   };
 
+  const handleEditThumbnailChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.includes('image/')) {
+      setError('Please select an image file for thumbnail');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Maximum thumbnail size is 5MB');
+      return;
+    }
+
+    setEditThumbnailFile(file);
+    setEditThumbnailPreview(URL.createObjectURL(file));
+    setError(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // ✅ Thumbnail is now mandatory
     if (!videoFile) {
       setError('Please upload a video');
+      return;
+    }
+    
+    if (!thumbnailFile) {
+      setError('Please upload a thumbnail image (Mandatory)');
       return;
     }
 
@@ -109,7 +156,8 @@ const ManageReels = () => {
     
     const formData = new FormData();
     formData.append('video', videoFile);
-    formData.append('hotTop', hotTop); // ✅ Send hotTop value
+    formData.append('thumbnail', thumbnailFile); // ✅ Thumbnail is now always sent
+    formData.append('hotTop', hotTop);
 
     try {
       await axios.post(`${API_BASE_URL}/createreel`, formData);
@@ -117,9 +165,10 @@ const ManageReels = () => {
       fetchReels();
       setVideoFile(null);
       setVideoPreview(null);
-      setHotTop(false); // ✅ Reset hotTop after submission
+      setThumbnailFile(null);
+      setThumbnailPreview(null);
+      setHotTop(false);
       
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       console.error('Error creating reel:', err);
@@ -171,6 +220,8 @@ const ManageReels = () => {
     setEditHotTop(reel.hotTop || false);
     setEditVideoFile(null);
     setEditVideoPreview(null);
+    setEditThumbnailFile(null);
+    setEditThumbnailPreview(null);
     setEditModalOpen(true);
   };
 
@@ -183,6 +234,10 @@ const ManageReels = () => {
     
     if (editVideoFile) {
       formData.append('video', editVideoFile);
+    }
+    
+    if (editThumbnailFile) {
+      formData.append('thumbnail', editThumbnailFile);
     }
     
     formData.append('likeCount', editLikeCount);
@@ -230,7 +285,6 @@ const ManageReels = () => {
 
   return (
     <div className="container my-4">
-      {/* Alert Messages */}
       {error && (
         <Alert color="danger" className="mb-4" toggle={() => setError(null)}>
           {error}
@@ -253,7 +307,9 @@ const ManageReels = () => {
 
               <Form onSubmit={handleSubmit}>
                 <FormGroup>
-                  <Label>Upload Video *</Label>
+                  <Label className="fw-bold">
+                    Upload Video <span className="text-danger">*</span>
+                  </Label>
                   <div className="d-flex flex-wrap gap-2 align-items-center">
                     <label className="btn btn-outline-primary btn-sm">
                       <FaUpload /> Choose Video
@@ -262,6 +318,7 @@ const ManageReels = () => {
                         hidden 
                         onChange={handleVideoChange}
                         accept="video/*"
+                        required
                       />
                     </label>
                     <span className="text-muted small">Max 50MB (MP4, MOV, etc.)</span>
@@ -271,7 +328,52 @@ const ManageReels = () => {
                   </small>
                 </FormGroup>
 
-                {/* ✅ HotTop Toggle/Slider */}
+                {/* Thumbnail Upload Field - MANDATORY */}
+                <FormGroup className="mt-3">
+                  <Label className="fw-bold">
+                    <FaImage className="me-1" /> Upload Thumbnail <span className="text-danger">* (Mandatory)</span>
+                  </Label>
+                  <div className="d-flex flex-wrap gap-2 align-items-center">
+                    <label className="btn btn-outline-primary btn-sm">
+                      <FaImage /> Choose Thumbnail
+                      <Input 
+                        type="file" 
+                        hidden 
+                        onChange={handleThumbnailChange}
+                        accept="image/*"
+                        required={!thumbnailFile}
+                      />
+                    </label>
+                    <span className="text-muted small">Max 5MB (JPG, PNG, etc.)</span>
+                  </div>
+                  <small className="text-danger d-block mt-1">
+                    ⚠️ Thumbnail is required. Please upload a thumbnail image for your reel.
+                  </small>
+                </FormGroup>
+
+                {thumbnailPreview && (
+                  <div className="mt-2">
+                    <img
+                      src={thumbnailPreview}
+                      alt="Thumbnail preview"
+                      className="rounded border"
+                      style={{ width: '100%', maxHeight: 150, objectFit: 'cover' }}
+                    />
+                    <Button
+                      color="danger"
+                      size="sm"
+                      className="mt-1"
+                      onClick={() => {
+                        setThumbnailFile(null);
+                        setThumbnailPreview(null);
+                      }}
+                    >
+                      Remove Thumbnail
+                    </Button>
+                  </div>
+                )}
+
+                {/* HotTop Toggle */}
                 <FormGroup className="mt-3">
                   <Label className="d-flex align-items-center gap-2">
                     <FaFire className={hotTop ? "text-danger" : "text-muted"} />
@@ -318,7 +420,7 @@ const ManageReels = () => {
                 <Button 
                   color="primary" 
                   className="mt-3 w-100"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !videoFile || !thumbnailFile}
                 >
                   {isSubmitting ? (
                     <>
@@ -357,7 +459,7 @@ const ManageReels = () => {
                     <thead className="table-light">
                       <tr>
                         <th>#</th>
-                        <th>Video</th>
+                        <th>Thumbnail/Video</th>
                         <th>Likes</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -369,16 +471,20 @@ const ManageReels = () => {
                         <tr key={reel._id}>
                           <td>{(currentPage - 1) * reelsPerPage + i + 1}</td>
 
-                          {/* Clickable Video */}
+                          {/* Clickable Thumbnail/Video */}
                           <td style={{ minWidth: 120 }}>
                             <div
                               style={{ position: 'relative', cursor: 'pointer' }}
                               onClick={() => openVideoModal(reel.videoUrl)}
                             >
-                              <video
-                                src={reel.videoUrl}
+                              <img
+                                src={reel.thumbnailUrl}
+                                alt="Reel thumbnail"
                                 className="w-100 rounded"
                                 style={{ height: 80, objectFit: 'cover' }}
+                                onError={(e) => {
+                                  e.target.src = 'https://via.placeholder.com/120x80?text=No+Thumbnail';
+                                }}
                               />
                               <FaPlay
                                 style={{
@@ -442,7 +548,6 @@ const ManageReels = () => {
                     </tbody>
                   </Table>
 
-                  {/* Pagination */}
                   {totalPages > 1 && (
                     <Pagination className="justify-content-center flex-wrap mt-3">
                       <PaginationItem disabled={currentPage === 1}>
@@ -508,6 +613,43 @@ const ManageReels = () => {
                     }}
                   >
                     Remove New Video
+                  </Button>
+                </div>
+              )}
+            </FormGroup>
+
+            <FormGroup className="mt-3">
+              <Label>Update Thumbnail (Optional)</Label>
+              <div className="d-flex flex-wrap gap-2 align-items-center">
+                <label className="btn btn-outline-secondary btn-sm">
+                  <FaImage /> Choose New Thumbnail
+                  <Input 
+                    type="file" 
+                    hidden 
+                    onChange={handleEditThumbnailChange}
+                    accept="image/*"
+                  />
+                </label>
+                <span className="text-muted small">Leave empty to keep current thumbnail</span>
+              </div>
+              {editThumbnailPreview && (
+                <div className="mt-2">
+                  <img
+                    src={editThumbnailPreview}
+                    alt="Thumbnail preview"
+                    className="rounded border"
+                    style={{ width: '100%', maxHeight: 150, objectFit: 'cover' }}
+                  />
+                  <Button
+                    color="danger"
+                    size="sm"
+                    className="mt-1"
+                    onClick={() => {
+                      setEditThumbnailFile(null);
+                      setEditThumbnailPreview(null);
+                    }}
+                  >
+                    Remove New Thumbnail
                   </Button>
                 </div>
               )}
