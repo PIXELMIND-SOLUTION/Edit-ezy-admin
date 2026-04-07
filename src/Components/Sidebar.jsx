@@ -97,7 +97,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
       dropdown: [
         { name: "Sticker Category", path: "/stickers-category" },
         { name: "Create Sticker", path: "/create-sticker" },
-        { name: "Get All Stickers", path: "/stickerlist" },
+        { name: "Get All Stickers", path: "/create-sticker" },
       ],
     },
      {

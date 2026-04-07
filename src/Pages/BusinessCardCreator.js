@@ -629,7 +629,7 @@ const BusinessCardCreator = () => {
       setSuccessMessage('Business card created successfully!');
       
       setTimeout(() => {
-        navigate('/businesscardslist');
+        navigate('/businesscardlist');
       }, 2000);
       
     } catch (error) {
@@ -977,7 +977,7 @@ const BusinessCardCreator = () => {
                 </TabContent>
 
                 <div className="d-flex justify-content-end gap-2 mt-4">
-                  <Button color="secondary" onClick={() => navigate('/businesscardslist')}>Cancel</Button>
+                  <Button color="secondary" onClick={() => navigate('/businesscardlist')}>Cancel</Button>
                   <Button color="primary" type="submit" disabled={loading}>
                     {loading ? <><FaSpinner className="spinner-border-sm me-1" /> Creating...</> : <><FaSave /> Create Card</>}
                   </Button>

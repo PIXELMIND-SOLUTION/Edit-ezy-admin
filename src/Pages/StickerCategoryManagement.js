@@ -261,7 +261,7 @@ const StickerCategoryManagement = () => {
         showAlert('Sticker category updated successfully!');
       } else {
         await axios.post(
-          '31.97.206.144:4061/api/admin/createsticker-category',
+          'http://31.97.206.144:4061/api/admin/createsticker-category',
           formDataToSend,
           {
             headers: { 'Content-Type': 'multipart/form-data' },

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FaEdit, FaTrash, FaTimes } from "react-icons/fa";
 import { utils, writeFile } from "xlsx";
 import axios from "axios";
@@ -7,7 +7,8 @@ export default function PosterList() {
   const [posters, setPosters] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const postersPerPage = 5;
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPoster, setSelectedPoster] = useState(null);
@@ -21,40 +22,59 @@ export default function PosterList() {
 
   const [previewModalImage, setPreviewModalImage] = useState(null);
 
+  // Fetch posters with pagination and search
+  const fetchPosters = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `http://31.97.206.144:4061/api/poster/getallposter`,
+        {
+          params: {
+            page: currentPage,
+            search: search || undefined,  // send search only if not empty
+          }
+        }
+      );
+      // Backend returns: { data, currentPage, totalPages, totalItems }
+      setPosters(response.data.data || []);
+      setCurrentPage(response.data.currentPage);
+      setTotalPages(response.data.totalPages);
+    } catch (error) {
+      console.error("Error fetching posters:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, search]);
+
   useEffect(() => {
-    axios
-      .get("http://31.97.206.144:4061/api/poster/getallposter")
-      .then((res) => {
-        if (res.data) setPosters(res.data);
-      })
-      .catch((error) => {
-        console.error("Error fetching posters:", error);
-      });
-  }, []);
+    fetchPosters();
+  }, [fetchPosters]);
 
-  const filteredPosters = posters.filter((poster) =>
-    (poster.name || "").toLowerCase().includes(search.toLowerCase())
-  );
+  // Debounce search to avoid too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentPage !== 1) setCurrentPage(1);
+      else fetchPosters();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const currentPosters = filteredPosters.slice(
-    (currentPage - 1) * postersPerPage,
-    currentPage * postersPerPage
-  );
-
-  const totalPages = Math.ceil(filteredPosters.length / postersPerPage);
-
+  // Delete poster
   const handleDelete = (id) => {
+    if (!window.confirm("Are you sure you want to delete this poster?")) return;
     axios
       .delete(`http://31.97.206.144:4061/api/poster/deleteposter/${id}`)
       .then(() => {
-        setPosters(posters.filter((poster) => poster._id !== id));
+        fetchPosters(); // refresh current page
         alert("Poster deleted successfully!");
       })
       .catch((error) => {
         console.error("Delete error:", error);
+        alert("Error deleting poster.");
       });
   };
 
+  // Edit poster
   const handleEdit = (poster) => {
     setSelectedPoster(poster);
     setEditedData({
@@ -71,9 +91,7 @@ export default function PosterList() {
     axios
       .put(`http://31.97.206.144:4061/api/poster/editposter/${selectedPoster._id}`, editedData)
       .then(() => {
-        setPosters((prev) =>
-          prev.map((p) => (p._id === selectedPoster._id ? { ...p, ...editedData } : p))
-        );
+        fetchPosters(); // refresh current page
         alert("Poster updated successfully!");
         setModalOpen(false);
         setSelectedPoster(null);
@@ -84,8 +102,9 @@ export default function PosterList() {
       });
   };
 
+  // Export (exports all posters matching current search – server‑side export would be better, but we keep client‑side export of current page for consistency)
   const exportData = (type) => {
-    const exportPosters = filteredPosters.map((poster, i) => ({
+    const exportPosters = posters.map((poster, i) => ({
       SI: i + 1,
       ID: poster._id,
       PosterName: poster.name || "N/A",
@@ -97,7 +116,6 @@ export default function PosterList() {
       PosterImage: poster.posterImage?.url || "N/A",
       CreatedAt: poster.createdAt ? new Date(poster.createdAt).toLocaleString() : "N/A"
     }));
-
     const ws = utils.json_to_sheet(exportPosters);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "Posters");
@@ -121,86 +139,96 @@ export default function PosterList() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-purple-600 text-white">
-              <th className="p-2 border">Sl</th>
-              <th className="p-2 border">Poster Image</th>
-              <th className="p-2 border">Title</th>
-              <th className="p-2 border">Name</th>
-              <th className="p-2 border">Category</th>
-              <th className="p-2 border">Poster Lang</th>
-              <th className="p-2 border">Description</th>
-              <th className="p-2 border">Action</th>
-             </tr>
-          </thead>
-          <tbody>
-            {currentPosters.map((poster, index) => (
-              <tr key={poster._id} className="border-b">
-                <td className="p-2 border">{index + 1 + (currentPage - 1) * postersPerPage}</td>
-                <td className="p-2 border">
-                  {poster.posterImage?.url ? (
-                    <img
-                      src={poster.posterImage.url}
-                      alt="poster"
-                      className="w-12 h-12 object-cover rounded cursor-pointer"
-                      onClick={() => setPreviewModalImage(poster.posterImage.url)}
-                      onError={(e) => (e.target.src = "/default-image.jpg")}
-                    />
-                  ) : (
-                    "N/A"
-                  )}
-                </td>
-                <td className="p-2 border">{poster.title || "N/A"}</td>
-                <td className="p-2 border">{poster.name || "N/A"}</td>
-                <td className="p-2 border">{poster.categoryName || "N/A"}</td>
-                <td className="p-2 border">{poster.posterlang || "N/A"}</td>
-                <td className="p-2 border">
-                  <div className="max-w-xs truncate" title={poster.description}>
-                    {poster.description || "N/A"}
-                  </div>
-                </td>
-                <td className="p-2 border flex gap-2">
-                  <button
-                    onClick={() => handleEdit(poster)}
-                    className="bg-blue-500 text-white px-2 py-1 rounded"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(poster._id)}
-                    className="bg-red-500 text-white px-2 py-1 rounded"
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {loading ? (
+        <div className="text-center py-4">Loading posters...</div>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-purple-600 text-white">
+                  <th className="p-2 border">Sl</th>
+                  <th className="p-2 border">Poster Image</th>
+                  <th className="p-2 border">Title</th>
+                  <th className="p-2 border">Name</th>
+                  <th className="p-2 border">Category</th>
+                  <th className="p-2 border">Poster Lang</th>
+                  <th className="p-2 border">Description</th>
+                  <th className="p-2 border">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {posters.map((poster, index) => (
+                  <tr key={poster._id} className="border-b">
+                    <td className="p-2 border">
+                      {(currentPage - 1) * 10 + index + 1}
+                    </td>
+                    <td className="p-2 border">
+                      {poster.posterImage?.url ? (
+                        <img
+                          src={poster.posterImage.url}
+                          alt="poster"
+                          className="w-12 h-12 object-cover rounded cursor-pointer"
+                          onClick={() => setPreviewModalImage(poster.posterImage.url)}
+                          onError={(e) => (e.target.src = "/default-image.jpg")}
+                        />
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
+                    <td className="p-2 border">{poster.title || "N/A"}</td>
+                    <td className="p-2 border">{poster.name || "N/A"}</td>
+                    <td className="p-2 border">{poster.categoryName || "N/A"}</td>
+                    <td className="p-2 border">{poster.posterlang || "N/A"}</td>
+                    <td className="p-2 border">
+                      <div className="max-w-xs truncate" title={poster.description}>
+                        {poster.description || "N/A"}
+                      </div>
+                    </td>
+                    <td className="p-2 border flex gap-2">
+                      <button
+                        onClick={() => handleEdit(poster)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(poster._id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded"
+                      >
+                        <FaTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-      {/* Pagination */}
-      <div className="flex justify-between mt-4">
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-        <span>Page {currentPage} of {totalPages}</span>
-        <button
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </button>
-      </div>
+          {/* Pagination */}
+          <div className="flex justify-between items-center mt-4">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+              disabled={currentPage === 1}
+            >
+              Previous
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
+              disabled={currentPage === totalPages}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
 
-      {/* Edit Modal - Removed black background */}
+      {/* Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-xl border border-gray-300">
@@ -245,7 +273,6 @@ export default function PosterList() {
                 onChange={(e) => setEditedData({ ...editedData, description: e.target.value })}
               />
             </div>
-
             <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={() => setModalOpen(false)}

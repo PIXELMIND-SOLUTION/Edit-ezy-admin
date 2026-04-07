@@ -3,7 +3,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import axios from "axios";
 import { utils, writeFile } from "xlsx";
 
-export default function CategoryPage() {
+export default function CategoryList() {
   // ===== CREATE =====
   const [categoryName, setCategoryName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,9 +17,17 @@ export default function CategoryPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState(null);
 
+  // ===== TOAST =====
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+
+  const showToast = (message, type = "success") => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: "", type: "success" }), 3000);
+  };
+
   const categoriesPerPage = 5;
 
-  // 🔄 Fetch Categories
+  // Fetch categories
   const fetchCategories = () => {
     axios
       .get("http://31.97.206.144:4061/api/category/getall-cateogry")
@@ -31,36 +39,42 @@ export default function CategoryPage() {
     fetchCategories();
   }, []);
 
-  // ✅ CREATE CATEGORY
+  // CREATE
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!categoryName.trim()) return alert("Enter category");
-
+    if (!categoryName.trim()) {
+      showToast("Please enter a category name", "error");
+      return;
+    }
     setIsSubmitting(true);
     try {
-      await axios.post(
-        "http://31.97.206.144:4061/api/category/create-cateogry",
-        { categoryName }
-      );
+      const res = await axios.post("http://31.97.206.144:4061/api/category/create-cateogry", {
+        categoryName,
+      });
+      // Show the actual message from API response
+      showToast(res.data.message || "Category created successfully!", "success");
       setCategoryName("");
       fetchCategories();
-    } catch {
-      alert("Error creating category");
+    } catch (error) {
+      showToast(error.response?.data?.message || "Error creating category", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // ✅ DELETE
+  // DELETE
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this category?")) return;
-    await axios.delete(
-      `http://31.97.206.144:4061/api/category/delete/${id}`
-    );
-    fetchCategories();
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    try {
+      const res = await axios.delete(`http://31.97.206.144:4061/api/category/delete/${id}`);
+      showToast(res.data.message || "Category deleted successfully", "success");
+      fetchCategories();
+    } catch (error) {
+      showToast(error.response?.data?.message || "Error deleting category", "error");
+    }
   };
 
-  // ✅ EDIT
+  // EDIT
   const handleEdit = (cat) => {
     setSelectedCategory(cat);
     setCategoryName(cat.categoryName);
@@ -68,26 +82,34 @@ export default function CategoryPage() {
   };
 
   const handleUpdate = async () => {
-    await axios.put(
-      `http://31.97.206.144:4061/api/category/update/${selectedCategory._id}`,
-      { categoryName }
-    );
-    setModalOpen(false);
-    setCategoryName("");
-    fetchCategories();
+    if (!categoryName.trim()) {
+      showToast("Category name cannot be empty", "error");
+      return;
+    }
+    try {
+      const res = await axios.put(
+        `http://31.97.206.144:4061/api/category/update/${selectedCategory._id}`,
+        { categoryName }
+      );
+      showToast(res.data.message || "Category updated successfully", "success");
+      setModalOpen(false);
+      setCategoryName("");
+      fetchCategories();
+    } catch (error) {
+      showToast(error.response?.data?.message || "Error updating category", "error");
+    }
   };
 
-  // 🔍 FILTER
+  // Filter & Pagination
   const filtered = categories.filter((c) =>
     c.categoryName.toLowerCase().includes(search.toLowerCase())
   );
-
   const indexOfLast = currentPage * categoriesPerPage;
   const indexOfFirst = indexOfLast - categoriesPerPage;
   const current = filtered.slice(indexOfFirst, indexOfLast);
   const totalPages = Math.ceil(filtered.length / categoriesPerPage);
 
-  // 📤 EXPORT
+  // Export
   const exportData = (type) => {
     const data = filtered.map((c, i) => ({
       SI: i + 1,
@@ -98,20 +120,27 @@ export default function CategoryPage() {
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "Categories");
     writeFile(wb, `categories.${type}`);
+    showToast(`Exported as ${type.toUpperCase()}`, "success");
   };
 
   return (
-    <div className="p-4 sm:p-6">
+    <div className="p-4 sm:p-6 relative">
+      {/* Toast Notification */}
+      {toast.show && (
+        <div
+          className={`fixed top-5 right-5 z-50 px-4 py-2 rounded-lg shadow-lg text-white transition-all duration-300 ${
+            toast.type === "success" ? "bg-green-500" : "bg-red-500"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
 
-      {/* 🔥 GRID LAYOUT */}
+      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* ================= CREATE ================= */}
+        {/* Create Card */}
         <div className="bg-white p-3 rounded-xl shadow-md h-fit">
-          <h4 className="text-lg font-semibold text-blue-600 mb-4">
-            Create Category
-          </h4>
-
+          <h4 className="text-lg font-semibold text-blue-600 mb-4">Create Category</h4>
           <form onSubmit={handleSubmit} className="space-y-3">
             <input
               type="text"
@@ -120,7 +149,6 @@ export default function CategoryPage() {
               onChange={(e) => setCategoryName(e.target.value)}
               className="w-full p-2 border rounded-lg"
             />
-
             <button
               type="submit"
               disabled={isSubmitting}
@@ -131,15 +159,11 @@ export default function CategoryPage() {
           </form>
         </div>
 
-        {/* ================= LIST ================= */}
+        {/* List Card */}
         <div className="lg:col-span-2 bg-white p-3 rounded-xl shadow-md">
-
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between gap-3 mb-4">
-            <h4 className="text-lg font-semibold text-blue-900">
-              All Categories
-            </h4>
-
+            <h4 className="text-lg font-semibold text-blue-900">All Categories</h4>
             <div className="flex gap-2 flex-wrap">
               <input
                 className="p-2 border rounded-lg"
@@ -147,7 +171,6 @@ export default function CategoryPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
-
               <button onClick={() => exportData("csv")} className="bg-gray-200 px-3 py-1 rounded">
                 CSV
               </button>
@@ -168,7 +191,6 @@ export default function CategoryPage() {
                   <th className="p-2">Action</th>
                 </tr>
               </thead>
-
               <tbody>
                 {current.map((cat, i) => (
                   <tr key={cat._id} className="border-b">
@@ -178,10 +200,16 @@ export default function CategoryPage() {
                       {new Date(cat.createdAt).toLocaleDateString()}
                     </td>
                     <td className="p-2 flex justify-center gap-2">
-                      <button onClick={() => handleEdit(cat)} className="bg-blue-500 text-white p-1 rounded">
+                      <button
+                        onClick={() => handleEdit(cat)}
+                        className="bg-blue-500 text-white p-1 rounded"
+                      >
                         <FaEdit />
                       </button>
-                      <button onClick={() => handleDelete(cat._id)} className="bg-red-500 text-white p-1 rounded">
+                      <button
+                        onClick={() => handleDelete(cat._id)}
+                        className="bg-red-500 text-white p-1 rounded"
+                      >
                         <FaTrash />
                       </button>
                     </td>
@@ -212,18 +240,16 @@ export default function CategoryPage() {
         </div>
       </div>
 
-      {/* ================= MODAL ================= */}
+      {/* Edit Modal */}
       {modalOpen && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50 p-3">
           <div className="bg-white rounded-xl p-5 w-full max-w-sm">
             <h3 className="text-lg font-semibold mb-3">Edit Category</h3>
-
             <input
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
               className="w-full p-2 border rounded mb-3"
             />
-
             <div className="flex justify-between">
               <button
                 onClick={() => setModalOpen(false)}
