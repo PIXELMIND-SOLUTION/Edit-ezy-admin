@@ -483,7 +483,7 @@ const ManageReels = () => {
                                 className="w-100 rounded"
                                 style={{ height: 80, objectFit: 'cover' }}
                                 onError={(e) => {
-                                  e.target.src = 'https://via.placeholder.com/120x80?text=No+Thumbnail';
+                                  e.target.src = '';
                                 }}
                               />
                               <FaPlay
