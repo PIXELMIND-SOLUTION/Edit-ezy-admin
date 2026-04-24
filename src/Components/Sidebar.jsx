@@ -12,7 +12,7 @@ const Sidebar = ({ isCollapsed, isMobile }) => {
 
   const handleLogout = async () => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL || "http://31.97.206.144:4061";
+      const apiUrl = process.env.REACT_APP_API_URL || "http://31.97.228.17:4061";
       await axios.post(`${apiUrl}/api/admin/logout`, {}, { withCredentials: true });
       localStorage.removeItem("authToken");
       alert("Logout successful");

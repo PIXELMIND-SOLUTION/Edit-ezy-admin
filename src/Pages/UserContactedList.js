@@ -14,7 +14,7 @@ export default function UserContactedList() {
 
   const fetchContactMessages = () => {
     axios
-      .get("http://31.97.206.144:4061/api/users/getallcontactus")
+      .get("http://31.97.228.17:4061/api/users/getallcontactus")
       .then((res) => {
         if (res.data && res.data.contactUsMessages) {
           setContacts(res.data.contactUsMessages);

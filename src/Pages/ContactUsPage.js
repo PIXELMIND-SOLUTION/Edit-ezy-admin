@@ -24,7 +24,7 @@ const ContactUsPage = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post("http://31.97.206.144:4061/api/admin/contact", formData);
+      const res = await axios.post("http://31.97.228.17:4061/api/admin/contact", formData);
       if (res.status === 201) {
         setSuccessMessage(res.data.message || "Message sent successfully!");
         setErrorMessage("");

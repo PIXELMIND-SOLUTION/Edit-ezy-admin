@@ -27,15 +27,14 @@ export default function PosterList() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://31.97.206.144:4061/api/poster/getallposter`,
+        `http://31.97.228.17:4061/api/poster/getallposter`,
         {
           params: {
             page: currentPage,
-            search: search || undefined,  // send search only if not empty
+            search: search || undefined,
           }
         }
       );
-      // Backend returns: { data, currentPage, totalPages, totalItems }
       setPosters(response.data.data || []);
       setCurrentPage(response.data.currentPage);
       setTotalPages(response.data.totalPages);
@@ -50,7 +49,7 @@ export default function PosterList() {
     fetchPosters();
   }, [fetchPosters]);
 
-  // Debounce search to avoid too many API calls
+  // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (currentPage !== 1) setCurrentPage(1);
@@ -63,9 +62,9 @@ export default function PosterList() {
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this poster?")) return;
     axios
-      .delete(`http://31.97.206.144:4061/api/poster/deleteposter/${id}`)
+      .delete(`http://31.97.228.17:4061/api/poster/deleteposter/${id}`)
       .then(() => {
-        fetchPosters(); // refresh current page
+        fetchPosters();
         alert("Poster deleted successfully!");
       })
       .catch((error) => {
@@ -89,9 +88,9 @@ export default function PosterList() {
 
   const handleSaveChanges = () => {
     axios
-      .put(`http://31.97.206.144:4061/api/poster/editposter/${selectedPoster._id}`, editedData)
+      .put(`http://31.97.228.17:4061/api/poster/editposter/${selectedPoster._id}`, editedData)
       .then(() => {
-        fetchPosters(); // refresh current page
+        fetchPosters();
         alert("Poster updated successfully!");
         setModalOpen(false);
         setSelectedPoster(null);
@@ -102,7 +101,7 @@ export default function PosterList() {
       });
   };
 
-  // Export (exports all posters matching current search – server‑side export would be better, but we keep client‑side export of current page for consistency)
+  // Export (includes Trending column)
   const exportData = (type) => {
     const exportPosters = posters.map((poster, i) => ({
       SI: i + 1,
@@ -112,6 +111,7 @@ export default function PosterList() {
       Title: poster.title || "N/A",
       Description: poster.description || "N/A",
       PosterLang: poster.posterlang || "N/A",
+      Trending: poster.isTrending ? "Yes" : "No",
       Tags: Array.isArray(poster.tags) ? poster.tags.join(", ") : "N/A",
       PosterImage: poster.posterImage?.url || "N/A",
       CreatedAt: poster.createdAt ? new Date(poster.createdAt).toLocaleString() : "N/A"
@@ -153,6 +153,7 @@ export default function PosterList() {
                   <th className="p-2 border">Name</th>
                   <th className="p-2 border">Category</th>
                   <th className="p-2 border">Poster Lang</th>
+                  <th className="p-2 border">Trending</th>
                   <th className="p-2 border">Description</th>
                   <th className="p-2 border">Action</th>
                 </tr>
@@ -180,6 +181,9 @@ export default function PosterList() {
                     <td className="p-2 border">{poster.name || "N/A"}</td>
                     <td className="p-2 border">{poster.categoryName || "N/A"}</td>
                     <td className="p-2 border">{poster.posterlang || "N/A"}</td>
+                    <td className="p-2 border">
+                      {poster.isTrending ? "Yes" : "No"}
+                    </td>
                     <td className="p-2 border">
                       <div className="max-w-xs truncate" title={poster.description}>
                         {poster.description || "N/A"}
@@ -228,7 +232,7 @@ export default function PosterList() {
         </>
       )}
 
-      {/* Edit Modal */}
+      {/* Edit Modal (no change – trending is not edited) */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg w-full max-w-lg shadow-xl border border-gray-300">

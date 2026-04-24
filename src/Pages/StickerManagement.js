@@ -87,7 +87,7 @@ const StickerManagement = () => {
   const fetchStickers = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://31.97.206.144:4061/api/admin/allsticker');
+      const response = await axios.get('http://31.97.228.17:4061/api/admin/allsticker');
       setStickers(response.data.stickers || []);
     } catch (error) {
       console.error('Error fetching stickers:', error);
@@ -100,7 +100,7 @@ const StickerManagement = () => {
   // Fetch all sticker categories
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://31.97.206.144:4061/api/admin/allsticker-category');
+      const response = await axios.get('http://31.97.228.17:4061/api/admin/allsticker-category');
       setCategories(response.data.categories || []);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -258,7 +258,7 @@ const StickerManagement = () => {
 
       if (editMode) {
         await axios.put(
-          `http://31.97.206.144:4061/api/admin/updatesticker/${currentStickerId}`,
+          `http://31.97.228.17:4061/api/admin/updatesticker/${currentStickerId}`,
           formDataToSend,
           {
             headers: { 'Content-Type': 'multipart/form-data' },
@@ -267,7 +267,7 @@ const StickerManagement = () => {
         showAlert('Sticker updated successfully!');
       } else {
         await axios.post(
-          'http://31.97.206.144:4061/api/admin/createsticker',
+          'http://31.97.228.17:4061/api/admin/createsticker',
           formDataToSend,
           {
             headers: { 'Content-Type': 'multipart/form-data' },
@@ -294,7 +294,7 @@ const StickerManagement = () => {
   const handleDelete = async () => {
     setModalLoading(true);
     try {
-      await axios.delete(`http://31.97.206.144:4061/api/admin/deletesticker/${currentStickerId}`);
+      await axios.delete(`http://31.97.228.17:4061/api/admin/deletesticker/${currentStickerId}`);
       showAlert('Sticker deleted successfully!');
       setDeleteModalOpen(false);
       fetchStickers();

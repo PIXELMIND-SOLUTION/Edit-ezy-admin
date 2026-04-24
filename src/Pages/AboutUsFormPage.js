@@ -14,7 +14,7 @@ const AboutUsFormPage = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://31.97.206.144:4061/api/admin/aboutus", {
+      const response = await fetch("http://31.97.228.17:4061/api/admin/aboutus", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

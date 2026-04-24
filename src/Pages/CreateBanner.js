@@ -24,7 +24,7 @@ const CreateBanner = () => {
 
   const fetchBanners = async () => {
     try {
-      const res = await axios.get('http://31.97.206.144:4061/api/poster/getbanners');
+      const res = await axios.get('http://31.97.228.17:4061/api/poster/getbanners');
       setBanners(res.data);
     } catch (err) {
       console.error('Error fetching banners:', err);
@@ -50,7 +50,7 @@ const CreateBanner = () => {
     images.forEach((img) => formData.append('images', img));
 
     try {
-      await axios.post('http://31.97.206.144:4061/api/poster/createbanner', formData, {
+      await axios.post('http://31.97.228.17:4061/api/poster/createbanner', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('✅ Banner created successfully');
@@ -79,7 +79,7 @@ const CreateBanner = () => {
     images.forEach((img) => formData.append('images', img));
 
     try {
-      await axios.put(`http://31.97.206.144:4061/api/poster/updatebanner/${editId}`, formData, {
+      await axios.put(`http://31.97.228.17:4061/api/poster/updatebanner/${editId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('✅ Banner updated successfully');
@@ -95,7 +95,7 @@ const CreateBanner = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this banner?')) return;
     try {
-      await axios.delete(`http://31.97.206.144:4061/api/poster/deletebanner/${id}`);
+      await axios.delete(`http://31.97.228.17:4061/api/poster/deletebanner/${id}`);
       fetchBanners();
     } catch (err) {
       console.error('Delete error:', err);

@@ -14,7 +14,7 @@ export default function ReportedUsers() {
 
   const fetchReportedUsers = async () => {
     try {
-      const res = await axios.get("http://31.97.206.144:4061/api/admin/getallreporteduser");
+      const res = await axios.get("http://31.97.228.17:4061/api/admin/getallreporteduser");
       if (res.data?.users) {
         setReportedUsers(res.data.users);
       }
@@ -30,7 +30,7 @@ export default function ReportedUsers() {
     if (!window.confirm(confirmMsg)) return;
 
     try {
-      const response = await axios.put(`http://31.97.206.144:4061/api/admin/block-user/${userId}`, {
+      const response = await axios.put(`http://31.97.228.17:4061/api/admin/block-user/${userId}`, {
         block: !isBlocked,
       });
 

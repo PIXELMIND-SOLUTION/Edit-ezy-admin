@@ -79,7 +79,7 @@ const AmountSettings = () => {
   const fetchAllAmounts = async () => {
     setFetchLoading(true);
     try {
-      const response = await axios.get('http://31.97.206.144:4061/api/admin/allamount');
+      const response = await axios.get('http://31.97.228.17:4061/api/admin/allamount');
       if (response.data.success) {
         setAmounts(response.data.data || []);
       }
@@ -124,7 +124,7 @@ const AmountSettings = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://31.97.206.144:4061/api/admin/setamount', {
+      const response = await axios.post('http://31.97.228.17:4061/api/admin/setamount', {
         name: name,
         amount: parseInt(amount)
       });
@@ -165,7 +165,7 @@ const AmountSettings = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://31.97.206.144:4061/api/admin/setamount', {
+      const response = await axios.post('http://31.97.228.17:4061/api/admin/setamount', {
         name: editName,
         amount: parseInt(editAmount)
       });
@@ -187,7 +187,7 @@ const AmountSettings = () => {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      const response = await axios.delete(`http://31.97.206.144:4061/api/admin/amount/${editId}`);
+      const response = await axios.delete(`http://31.97.228.17:4061/api/admin/amount/${editId}`);
       
       if (response.data.success) {
         showAlert('Amount deleted successfully!');

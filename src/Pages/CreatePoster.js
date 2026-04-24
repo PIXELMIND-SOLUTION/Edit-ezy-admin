@@ -58,7 +58,7 @@
 
 //   useEffect(() => {
 //     axios
-//       .get('http://31.97.206.144:4061/api/category/getall-cateogry')
+//       .get('http://31.97.228.17:4061/api/category/getall-cateogry')
 //       .then((response) => {
 //         if (response.data.success) {
 //           setCategories(response.data.categories);
@@ -317,7 +317,7 @@
 //       formData.append('designData', JSON.stringify(posterData.designData));
 
 //       const response = await axios.post(
-//         'http://31.97.206.144:4061/api/poster/create-canvaposter',
+//         'http://31.97.228.17:4061/api/poster/create-canvaposter',
 //         formData,
 //         {
 //           headers: {
@@ -887,6 +887,7 @@ const CreatePoster = () => {
   const [tags, setTags] = useState('');
   const [title, setTitle] = useState('');
   const [posterlang, setPosterlang] = useState('');
+  const [isTrending, setIsTrending] = useState(false);          // <-- NEW
   const [errorMessage, setErrorMessage] = useState('');
   const [categories, setCategories] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -927,7 +928,7 @@ const CreatePoster = () => {
 
   useEffect(() => {
     axios
-      .get('http://31.97.206.144:4061/api/category/getall-cateogry')
+      .get('http://31.97.228.17:4061/api/category/getall-cateogry')
       .then((response) => {
         if (response.data.success) {
           setCategories(response.data.categories);
@@ -1188,10 +1189,11 @@ const CreatePoster = () => {
       if (tags) formData.append('tags', tags);
       if (title) formData.append('title', title);
       if (posterlang) formData.append('posterlang', posterlang);
+      formData.append('isTrending', isTrending);                 // <-- NEW
       formData.append('designData', JSON.stringify(posterData.designData));
 
       const response = await axios.post(
-        'http://31.97.206.144:4061/api/poster/create-canvaposter',
+        'http://31.97.228.17:4061/api/poster/create-canvaposter',
         formData,
         {
           headers: {
@@ -1273,6 +1275,19 @@ const CreatePoster = () => {
                     placeholder="Enter poster language (e.g., English, Hindi, etc.)"
                     value={posterlang}
                     onChange={(e) => setPosterlang(e.target.value)}
+                  />
+                </FormGroup>
+
+                {/* NEW isTrending Checkbox */}
+                <FormGroup switch>
+                  <Label for="isTrending" style={{ cursor: 'pointer' }}>
+                    Mark as Trending
+                  </Label>
+                  <Input
+                    type="checkbox"
+                    id="isTrending"
+                    checked={isTrending}
+                    onChange={(e) => setIsTrending(e.target.checked)}
                   />
                 </FormGroup>
 

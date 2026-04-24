@@ -5,13 +5,16 @@ import {
   Spinner, Alert, Badge
 } from 'reactstrap';
 import axios from 'axios';
-import { FaTrash, FaEdit, FaUpload, FaPlay, FaHeart, FaRegHeart, FaFire, FaImage } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaUpload, FaPlay, FaHeart, FaRegHeart, FaFire, FaImage, FaMusic } from 'react-icons/fa';
 
 const ManageReels = () => {
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState(null);
+  const [audioFile, setAudioFile] = useState(null);
+  const [audioPreview, setAudioPreview] = useState(null);
+  const [audioDuration, setAudioDuration] = useState(0);
   const [hotTop, setHotTop] = useState(false);
   const [reels, setReels] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,6 +29,9 @@ const ManageReels = () => {
   const [editVideoPreview, setEditVideoPreview] = useState(null);
   const [editThumbnailFile, setEditThumbnailFile] = useState(null);
   const [editThumbnailPreview, setEditThumbnailPreview] = useState(null);
+  const [editAudioFile, setEditAudioFile] = useState(null);
+  const [editAudioPreview, setEditAudioPreview] = useState(null);
+  const [editAudioDuration, setEditAudioDuration] = useState(0);
   const [editId, setEditId] = useState(null);
   const [editLikeCount, setEditLikeCount] = useState(0);
   const [editIsLiked, setEditIsLiked] = useState(false);
@@ -43,8 +49,7 @@ const ManageReels = () => {
     currentPage * reelsPerPage
   );
 
-  // API Base URL
-  const API_BASE_URL = 'http://31.97.206.144:4061/api/admin';
+  const API_BASE_URL = 'http://31.97.228.17:4061/api/admin';
 
   const fetchReels = async () => {
     setLoading(true);
@@ -63,6 +68,27 @@ const ManageReels = () => {
   useEffect(() => {
     fetchReels();
   }, []);
+
+  // Validate audio duration (max 30 seconds)
+  const validateAudioDuration = (file, callback) => {
+    if (!file) return callback(true);
+    const audio = new Audio();
+    const objectUrl = URL.createObjectURL(file);
+    audio.src = objectUrl;
+    audio.addEventListener('loadedmetadata', () => {
+      URL.revokeObjectURL(objectUrl);
+      const duration = audio.duration;
+      if (duration > 30) {
+        callback(false, duration);
+      } else {
+        callback(true, duration);
+      }
+    });
+    audio.addEventListener('error', () => {
+      URL.revokeObjectURL(objectUrl);
+      callback(false, 0);
+    });
+  };
 
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
@@ -98,6 +124,34 @@ const ManageReels = () => {
     setThumbnailFile(file);
     setThumbnailPreview(URL.createObjectURL(file));
     setError(null);
+  };
+
+  const handleAudioChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.includes('audio/')) {
+      setError('Please select an audio file (MP3, WAV, etc.)');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Maximum audio file size is 10MB');
+      return;
+    }
+
+    validateAudioDuration(file, (isValid, duration) => {
+      if (!isValid) {
+        setError(`Audio duration is ${duration.toFixed(1)} seconds. Maximum allowed is 30 seconds.`);
+        setAudioFile(null);
+        setAudioPreview(null);
+        setAudioDuration(0);
+      } else {
+        setAudioFile(file);
+        setAudioPreview(URL.createObjectURL(file));
+        setAudioDuration(duration);
+        setError(null);
+      }
+    });
   };
 
   const handleEditVideoChange = (e) => {
@@ -136,17 +190,47 @@ const ManageReels = () => {
     setError(null);
   };
 
+  const handleEditAudioChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.includes('audio/')) {
+      setError('Please select an audio file (MP3, WAV, etc.)');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError('Maximum audio file size is 10MB');
+      return;
+    }
+
+    validateAudioDuration(file, (isValid, duration) => {
+      if (!isValid) {
+        setError(`Audio duration is ${duration.toFixed(1)} seconds. Maximum allowed is 30 seconds.`);
+        setEditAudioFile(null);
+        setEditAudioPreview(null);
+        setEditAudioDuration(0);
+      } else {
+        setEditAudioFile(file);
+        setEditAudioPreview(URL.createObjectURL(file));
+        setEditAudioDuration(duration);
+        setError(null);
+      }
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // ✅ Thumbnail is now mandatory
     if (!videoFile) {
       setError('Please upload a video');
       return;
     }
-    
     if (!thumbnailFile) {
       setError('Please upload a thumbnail image (Mandatory)');
+      return;
+    }
+    if (audioFile && audioDuration > 30) {
+      setError(`Audio duration exceeds 30 seconds (${audioDuration.toFixed(1)}s)`);
       return;
     }
 
@@ -156,7 +240,8 @@ const ManageReels = () => {
     
     const formData = new FormData();
     formData.append('video', videoFile);
-    formData.append('thumbnail', thumbnailFile); // ✅ Thumbnail is now always sent
+    formData.append('thumbnail', thumbnailFile);
+    if (audioFile) formData.append('audio', audioFile);
     formData.append('hotTop', hotTop);
 
     try {
@@ -167,6 +252,9 @@ const ManageReels = () => {
       setVideoPreview(null);
       setThumbnailFile(null);
       setThumbnailPreview(null);
+      setAudioFile(null);
+      setAudioPreview(null);
+      setAudioDuration(0);
       setHotTop(false);
       
       setTimeout(() => setSuccess(null), 3000);
@@ -222,6 +310,9 @@ const ManageReels = () => {
     setEditVideoPreview(null);
     setEditThumbnailFile(null);
     setEditThumbnailPreview(null);
+    setEditAudioFile(null);
+    setEditAudioPreview(null);
+    setEditAudioDuration(0);
     setEditModalOpen(true);
   };
 
@@ -232,13 +323,9 @@ const ManageReels = () => {
     
     const formData = new FormData();
     
-    if (editVideoFile) {
-      formData.append('video', editVideoFile);
-    }
-    
-    if (editThumbnailFile) {
-      formData.append('thumbnail', editThumbnailFile);
-    }
+    if (editVideoFile) formData.append('video', editVideoFile);
+    if (editThumbnailFile) formData.append('thumbnail', editThumbnailFile);
+    if (editAudioFile) formData.append('audio', editAudioFile);
     
     formData.append('likeCount', editLikeCount);
     formData.append('isLiked', editIsLiked);
@@ -263,13 +350,8 @@ const ManageReels = () => {
   const getPagination = () => {
     const pages = [];
     const delta = 1;
-
     for (let i = 1; i <= totalPages; i++) {
-      if (
-        i === 1 ||
-        i === totalPages ||
-        (i >= currentPage - delta && i <= currentPage + delta)
-      ) {
+      if (i === 1 || i === totalPages || (i >= currentPage - delta && i <= currentPage + delta)) {
         pages.push(i);
       } else if (pages[pages.length - 1] !== '...') {
         pages.push('...');
@@ -313,13 +395,7 @@ const ManageReels = () => {
                   <div className="d-flex flex-wrap gap-2 align-items-center">
                     <label className="btn btn-outline-primary btn-sm">
                       <FaUpload /> Choose Video
-                      <Input 
-                        type="file" 
-                        hidden 
-                        onChange={handleVideoChange}
-                        accept="video/*"
-                        required
-                      />
+                      <Input type="file" hidden onChange={handleVideoChange} accept="video/*" required />
                     </label>
                     <span className="text-muted small">Max 50MB (MP4, MOV, etc.)</span>
                   </div>
@@ -328,7 +404,6 @@ const ManageReels = () => {
                   </small>
                 </FormGroup>
 
-                {/* Thumbnail Upload Field - MANDATORY */}
                 <FormGroup className="mt-3">
                   <Label className="fw-bold">
                     <FaImage className="me-1" /> Upload Thumbnail <span className="text-danger">* (Mandatory)</span>
@@ -336,13 +411,7 @@ const ManageReels = () => {
                   <div className="d-flex flex-wrap gap-2 align-items-center">
                     <label className="btn btn-outline-primary btn-sm">
                       <FaImage /> Choose Thumbnail
-                      <Input 
-                        type="file" 
-                        hidden 
-                        onChange={handleThumbnailChange}
-                        accept="image/*"
-                        required={!thumbnailFile}
-                      />
+                      <Input type="file" hidden onChange={handleThumbnailChange} accept="image/*" required={!thumbnailFile} />
                     </label>
                     <span className="text-muted small">Max 5MB (JPG, PNG, etc.)</span>
                   </div>
@@ -351,8 +420,50 @@ const ManageReels = () => {
                   </small>
                 </FormGroup>
 
-                {thumbnailPreview && (
+                {/* Audio Upload Field with 30 sec limit */}
+                <FormGroup className="mt-3">
+                  <Label className="fw-bold">
+                    <FaMusic className="me-1" /> Background Audio (Optional)
+                  </Label>
+                  <div className="d-flex flex-wrap gap-2 align-items-center">
+                    <label className="btn btn-outline-secondary btn-sm">
+                      <FaMusic /> Choose Audio
+                      <Input type="file" hidden onChange={handleAudioChange} accept="audio/*" />
+                    </label>
+                    <span className="text-muted small">MP3, WAV, etc. Max 10MB</span>
+                  </div>
+                  <small className="text-warning d-block mt-1">
+                    ⏱️ ⚠️ Audio duration must be <strong>30 seconds or less</strong>. Longer audio will be rejected.
+                  </small>
+                  <small className="text-muted d-block">
+                    If no audio is uploaded, the original video sound will be used (if any).
+                  </small>
+                </FormGroup>
+
+                {audioPreview && (
                   <div className="mt-2">
+                    <audio controls src={audioPreview} className="w-100" style={{ maxHeight: 50 }}>
+                      Your browser does not support the audio element.
+                    </audio>
+                    <div className="d-flex justify-content-between align-items-center mt-1">
+                      <small className="text-muted">Duration: {audioDuration.toFixed(1)} sec</small>
+                      <Button
+                        color="danger"
+                        size="sm"
+                        onClick={() => {
+                          setAudioFile(null);
+                          setAudioPreview(null);
+                          setAudioDuration(0);
+                        }}
+                      >
+                        Remove Audio
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {thumbnailPreview && (
+                  <div className="mt-3">
                     <img
                       src={thumbnailPreview}
                       alt="Thumbnail preview"
@@ -373,7 +484,6 @@ const ManageReels = () => {
                   </div>
                 )}
 
-                {/* HotTop Toggle */}
                 <FormGroup className="mt-3">
                   <Label className="d-flex align-items-center gap-2">
                     <FaFire className={hotTop ? "text-danger" : "text-muted"} />
@@ -460,18 +570,16 @@ const ManageReels = () => {
                       <tr>
                         <th>#</th>
                         <th>Thumbnail/Video</th>
+                        <th>Audio</th>
                         <th>Likes</th>
                         <th>Status</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
-
                     <tbody>
                       {paginatedReels.map((reel, i) => (
                         <tr key={reel._id}>
                           <td>{(currentPage - 1) * reelsPerPage + i + 1}</td>
-
-                          {/* Clickable Thumbnail/Video */}
                           <td style={{ minWidth: 120 }}>
                             <div
                               style={{ position: 'relative', cursor: 'pointer' }}
@@ -482,9 +590,7 @@ const ManageReels = () => {
                                 alt="Reel thumbnail"
                                 className="w-100 rounded"
                                 style={{ height: 80, objectFit: 'cover' }}
-                                onError={(e) => {
-                                  e.target.src = '';
-                                }}
+                                onError={(e) => { e.target.src = ''; }}
                               />
                               <FaPlay
                                 style={{
@@ -499,24 +605,23 @@ const ManageReels = () => {
                               />
                             </div>
                           </td>
-
+                          <td className="text-center">
+                            {reel.audioUrl ? (
+                              <span className="text-success" title="Has background audio">
+                                <FaMusic size={18} />
+                              </span>
+                            ) : (
+                              <span className="text-muted" title="No background audio">—</span>
+                            )}
+                          </td>
                           <td>
                             <div className="d-flex align-items-center gap-2">
-                              <Button 
-                                size="sm" 
-                                color="link" 
-                                onClick={() => handleLikeToggle(reel)}
-                                className="p-0"
-                              >
-                                {reel.isLiked ? 
-                                  <FaHeart className="text-danger" size={18} /> : 
-                                  <FaRegHeart size={18} />
-                                }
+                              <Button size="sm" color="link" onClick={() => handleLikeToggle(reel)} className="p-0">
+                                {reel.isLiked ? <FaHeart className="text-danger" size={18} /> : <FaRegHeart size={18} />}
                               </Button>
                               <span className="fw-semibold">{reel.likeCount}</span>
                             </div>
                           </td>
-
                           <td>
                             {reel.hotTop && (
                               <Badge color="danger" className="d-flex align-items-center gap-1" style={{ width: 'fit-content' }}>
@@ -524,21 +629,12 @@ const ManageReels = () => {
                               </Badge>
                             )}
                           </td>
-
                           <td>
                             <div className="d-flex gap-2 flex-wrap">
-                              <Button 
-                                size="sm" 
-                                color="primary"
-                                onClick={() => openEditModal(reel)}
-                              >
+                              <Button size="sm" color="primary" onClick={() => openEditModal(reel)}>
                                 <FaEdit />
                               </Button>
-                              <Button 
-                                size="sm" 
-                                color="danger" 
-                                onClick={() => handleDelete(reel._id)}
-                              >
+                              <Button size="sm" color="danger" onClick={() => handleDelete(reel._id)}>
                                 <FaTrash />
                               </Button>
                             </div>
@@ -553,7 +649,6 @@ const ManageReels = () => {
                       <PaginationItem disabled={currentPage === 1}>
                         <PaginationLink previous onClick={() => handlePageChange(currentPage - 1)} />
                       </PaginationItem>
-
                       {getPagination().map((p, i) => (
                         <PaginationItem key={i} active={p === currentPage} disabled={p === '...'}>
                           <PaginationLink onClick={() => p !== '...' && handlePageChange(p)}>
@@ -561,7 +656,6 @@ const ManageReels = () => {
                           </PaginationLink>
                         </PaginationItem>
                       ))}
-
                       <PaginationItem disabled={currentPage === totalPages}>
                         <PaginationLink next onClick={() => handlePageChange(currentPage + 1)} />
                       </PaginationItem>
@@ -576,9 +670,7 @@ const ManageReels = () => {
 
       {/* Edit Reel Modal */}
       <Modal isOpen={editModalOpen} toggle={() => setEditModalOpen(false)} size="lg">
-        <ModalHeader toggle={() => setEditModalOpen(false)}>
-          Edit Reel
-        </ModalHeader>
+        <ModalHeader toggle={() => setEditModalOpen(false)}>Edit Reel</ModalHeader>
         <Form onSubmit={handleEditSubmit}>
           <ModalBody>
             <FormGroup>
@@ -586,34 +678,17 @@ const ManageReels = () => {
               <div className="d-flex flex-wrap gap-2 align-items-center">
                 <label className="btn btn-outline-primary btn-sm">
                   <FaUpload /> Choose New Video
-                  <Input 
-                    type="file" 
-                    hidden 
-                    onChange={handleEditVideoChange}
-                    accept="video/*"
-                  />
+                  <Input type="file" hidden onChange={handleEditVideoChange} accept="video/*" />
                 </label>
                 <span className="text-muted small">Leave empty to keep current video</span>
               </div>
               {editVideoPreview && (
                 <div className="mt-2">
-                  <video
-                    src={editVideoPreview}
-                    controls
-                    className="w-100 rounded"
-                    style={{ maxHeight: 150, objectFit: 'cover' }}
-                  />
-                  <Button
-                    color="danger"
-                    size="sm"
-                    className="mt-1"
-                    onClick={() => {
-                      setEditVideoFile(null);
-                      setEditVideoPreview(null);
-                    }}
-                  >
-                    Remove New Video
-                  </Button>
+                  <video src={editVideoPreview} controls className="w-100 rounded" style={{ maxHeight: 150, objectFit: 'cover' }} />
+                  <Button color="danger" size="sm" className="mt-1" onClick={() => {
+                    setEditVideoFile(null);
+                    setEditVideoPreview(null);
+                  }}>Remove New Video</Button>
                 </div>
               )}
             </FormGroup>
@@ -623,95 +698,80 @@ const ManageReels = () => {
               <div className="d-flex flex-wrap gap-2 align-items-center">
                 <label className="btn btn-outline-secondary btn-sm">
                   <FaImage /> Choose New Thumbnail
-                  <Input 
-                    type="file" 
-                    hidden 
-                    onChange={handleEditThumbnailChange}
-                    accept="image/*"
-                  />
+                  <Input type="file" hidden onChange={handleEditThumbnailChange} accept="image/*" />
                 </label>
                 <span className="text-muted small">Leave empty to keep current thumbnail</span>
               </div>
               {editThumbnailPreview && (
                 <div className="mt-2">
-                  <img
-                    src={editThumbnailPreview}
-                    alt="Thumbnail preview"
-                    className="rounded border"
-                    style={{ width: '100%', maxHeight: 150, objectFit: 'cover' }}
-                  />
-                  <Button
-                    color="danger"
-                    size="sm"
-                    className="mt-1"
-                    onClick={() => {
-                      setEditThumbnailFile(null);
-                      setEditThumbnailPreview(null);
-                    }}
-                  >
-                    Remove New Thumbnail
-                  </Button>
+                  <img src={editThumbnailPreview} alt="Thumbnail preview" className="rounded border" style={{ width: '100%', maxHeight: 150, objectFit: 'cover' }} />
+                  <Button color="danger" size="sm" className="mt-1" onClick={() => {
+                    setEditThumbnailFile(null);
+                    setEditThumbnailPreview(null);
+                  }}>Remove New Thumbnail</Button>
+                </div>
+              )}
+            </FormGroup>
+
+            <FormGroup className="mt-3">
+              <Label>Update Background Audio (Optional, ≤30 sec)</Label>
+              <div className="d-flex flex-wrap gap-2 align-items-center">
+                <label className="btn btn-outline-warning btn-sm">
+                  <FaMusic /> Choose New Audio
+                  <Input type="file" hidden onChange={handleEditAudioChange} accept="audio/*" />
+                </label>
+                <span className="text-muted small">Leave empty to keep existing audio</span>
+              </div>
+              <small className="text-warning d-block mt-1">
+                ⏱️ Audio must be ≤30 seconds. Longer files will be rejected.
+              </small>
+              {editAudioPreview && (
+                <div className="mt-2">
+                  <audio controls src={editAudioPreview} className="w-100" />
+                  <div className="d-flex justify-content-between align-items-center mt-1">
+                    <small className="text-muted">Duration: {editAudioDuration.toFixed(1)} sec</small>
+                    <Button color="danger" size="sm" onClick={() => {
+                      setEditAudioFile(null);
+                      setEditAudioPreview(null);
+                      setEditAudioDuration(0);
+                    }}>Remove New Audio</Button>
+                  </div>
                 </div>
               )}
             </FormGroup>
 
             <FormGroup>
               <Label>Like Count</Label>
-              <Input
-                type="number"
-                value={editLikeCount}
-                onChange={(e) => setEditLikeCount(parseInt(e.target.value) || 0)}
-                min="0"
-              />
+              <Input type="number" value={editLikeCount} onChange={(e) => setEditLikeCount(parseInt(e.target.value) || 0)} min="0" />
             </FormGroup>
 
             <FormGroup check>
               <Label check>
-                <Input
-                  type="checkbox"
-                  checked={editIsLiked}
-                  onChange={(e) => setEditIsLiked(e.target.checked)}
-                />{' '}
+                <Input type="checkbox" checked={editIsLiked} onChange={(e) => setEditIsLiked(e.target.checked)} />{' '}
                 Liked Status
               </Label>
             </FormGroup>
 
             <FormGroup check className="mt-2">
               <Label check className="d-flex align-items-center gap-2">
-                <Input
-                  type="checkbox"
-                  checked={editHotTop}
-                  onChange={(e) => setEditHotTop(e.target.checked)}
-                />{' '}
+                <Input type="checkbox" checked={editHotTop} onChange={(e) => setEditHotTop(e.target.checked)} />{' '}
                 <FaFire className="text-danger" /> Mark as Hot/Top Reel
               </Label>
             </FormGroup>
           </ModalBody>
           <ModalFooter>
-            <Button color="secondary" onClick={() => setEditModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button color="primary" type="submit">
-              Update Reel
-            </Button>
+            <Button color="secondary" onClick={() => setEditModalOpen(false)}>Cancel</Button>
+            <Button color="primary" type="submit">Update Reel</Button>
           </ModalFooter>
         </Form>
       </Modal>
 
       {/* Video Preview Modal */}
       <Modal isOpen={videoModal} toggle={() => setVideoModal(false)} centered size="lg">
-        <ModalHeader toggle={() => setVideoModal(false)}>
-          Reel Preview
-        </ModalHeader>
+        <ModalHeader toggle={() => setVideoModal(false)}>Reel Preview</ModalHeader>
         <ModalBody className="text-center p-2">
           {selectedVideo && (
-            <video
-              src={selectedVideo}
-              controls
-              autoPlay
-              className="w-100 rounded"
-              style={{ maxHeight: '70vh', objectFit: 'contain' }}
-            />
+            <video src={selectedVideo} controls autoPlay className="w-100 rounded" style={{ maxHeight: '70vh', objectFit: 'contain' }} />
           )}
         </ModalBody>
       </Modal>

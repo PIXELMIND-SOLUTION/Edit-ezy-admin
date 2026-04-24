@@ -67,7 +67,7 @@ const WalletSettings = () => {
   const fetchWalletCoins = async () => {
     setFetchLoading(true);
     try {
-      const response = await axios.get('http://31.97.206.144:4061/api/admin/getwallet');
+      const response = await axios.get('http://31.97.228.17:4061/api/admin/getwallet');
       if (response.data.success) {
         setCoins(response.data.amount.toString());
         if (response.data.amount > 0) {
@@ -116,7 +116,7 @@ const WalletSettings = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://31.97.206.144:4061/api/admin/setwallet', {
+      const response = await axios.post('http://31.97.228.17:4061/api/admin/setwallet', {
         amount: parseInt(newCoins)
       });
       
@@ -145,7 +145,7 @@ const WalletSettings = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://31.97.206.144:4061/api/admin/setwallet', {
+      const response = await axios.post('http://31.97.228.17:4061/api/admin/setwallet', {
         amount: parseInt(editCoins)
       });
       
@@ -168,7 +168,7 @@ const WalletSettings = () => {
   const handleDelete = async () => {
     setLoading(true);
     try {
-      const response = await axios.delete('http://31.97.206.144:4061/api/admin/deletewallet');
+      const response = await axios.delete('http://31.97.228.17:4061/api/admin/deletewallet');
       
       if (response.data.success) {
         showAlert('User coins config deleted successfully!');

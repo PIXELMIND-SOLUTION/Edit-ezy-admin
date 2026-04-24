@@ -43,7 +43,7 @@ const GetAboutUsPage = () => {
   useEffect(() => {
     const fetchAboutUsData = async () => {
       try {
-        const response = await axios.get("http://31.97.206.144:4061/api/admin/getaboutus");
+        const response = await axios.get("http://31.97.228.17:4061/api/admin/getaboutus");
         
         console.log("API Response:", response.data); // Debug ke liye
 
@@ -102,7 +102,7 @@ const GetAboutUsPage = () => {
     try {
       setLoading(true);
       await axios.put(
-        `http://31.97.206.144:4061/api/admin/updateaboutus/${aboutUsData._id}`,
+        `http://31.97.228.17:4061/api/admin/updateaboutus/${aboutUsData._id}`,
         { title, content, date }
       );
       
@@ -137,7 +137,7 @@ const GetAboutUsPage = () => {
     try {
       setLoading(true);
       await axios.delete(
-        `http://31.97.206.144:4061/api/admin/deleteaboutus/${aboutUsData._id}`
+        `http://31.97.228.17:4061/api/admin/deleteaboutus/${aboutUsData._id}`
       );
       
       setApiMessage("About Us deleted successfully!");

@@ -18,7 +18,7 @@ const OrdersList = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get(
-          "http://31.97.206.144:4061/api/users/allorders"
+          "http://31.97.228.17:4061/api/users/allorders"
         );
         console.log("API Response:", response.data); // Log the response to check the structure
         if (response.data && response.data.orders) {
@@ -54,7 +54,7 @@ const OrdersList = () => {
     if (selectedOrder) {
       try {
         await axios.put(
-          `http://31.97.206.144:4061/api/users/orderstatus/${selectedOrder._id}`,
+          `http://31.97.228.17:4061/api/users/orderstatus/${selectedOrder._id}`,
           { status: newStatus }
         );
 
@@ -77,7 +77,7 @@ const OrdersList = () => {
     if (window.confirm("Are you sure you want to delete this order?")) {
       try {
         await axios.delete(
-          `http://31.97.206.144:4061/api/users/deleteorder/${id}`
+          `http://31.97.228.17:4061/api/users/deleteorder/${id}`
         );
         setOrdersData(ordersData.filter((order) => order._id !== id));
         alert("Order deleted successfully.");

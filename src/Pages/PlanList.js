@@ -20,7 +20,7 @@ const PlanList = () => {
 
   const fetchPlans = async () => {
     try {
-      const response = await axios.get("http://31.97.206.144:4061/api/plans/getallplan");
+      const response = await axios.get("http://31.97.228.17:4061/api/plans/getallplan");
       setPlans(response.data.plans || []);
     } catch (error) {
       console.error("Error fetching plans:", error);
@@ -77,7 +77,7 @@ const PlanList = () => {
     };
 
     axios
-      .put(`http://31.97.206.144:4061/api/plans/update/${selectedPlan._id}`, updatedPlan)
+      .put(`http://31.97.228.17:4061/api/plans/update/${selectedPlan._id}`, updatedPlan)
       .then(() => {
         setPlans(plans.map((plan) => (plan._id === selectedPlan._id ? updatedPlan : plan)));
         setIsModalOpen(false);
@@ -94,7 +94,7 @@ const PlanList = () => {
     if (!confirmDelete) return;
 
     axios
-      .delete(`http://31.97.206.144:4061/api/plans/delete/${id}`)
+      .delete(`http://31.97.228.17:4061/api/plans/delete/${id}`)
       .then(() => {
         setPlans(plans.filter((plan) => plan._id !== id));
         alert("Plan deleted successfully!");

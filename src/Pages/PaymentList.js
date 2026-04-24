@@ -11,7 +11,7 @@ const PaymentList = () => {
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const response = await axios.get("http://31.97.206.144:4061/api/payment/payments");
+        const response = await axios.get("http://31.97.228.17:4061/api/payment/payments");
         if (response.data.success) {
           const sorted = response.data.payments.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setPayments(sorted);

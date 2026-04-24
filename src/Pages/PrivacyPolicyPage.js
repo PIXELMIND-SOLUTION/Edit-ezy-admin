@@ -40,7 +40,7 @@ const PrivacyPolicyPage = () => {
     const fetchPrivacyPolicy = async () => {
       try {
         const response = await axios.get(
-          "http://31.97.206.144:4061/api/admin/getpolicy"
+          "http://31.97.228.17:4061/api/admin/getpolicy"
         );
         
         console.log("API Response:", response.data); // Debug ke liye
@@ -99,7 +99,7 @@ const PrivacyPolicyPage = () => {
     try {
       setLoading(true);
       await axios.put(
-        `http://31.97.206.144:4061/api/admin/updatepolicy/${privacyPolicy._id}`,
+        `http://31.97.228.17:4061/api/admin/updatepolicy/${privacyPolicy._id}`,
         { title, content, date }
       );
       
@@ -136,7 +136,7 @@ const PrivacyPolicyPage = () => {
     try {
       setLoading(true);
       await axios.delete(
-        `http://31.97.206.144:4061/api/admin/deletepolicy/${privacyPolicy._id}`
+        `http://31.97.228.17:4061/api/admin/deletepolicy/${privacyPolicy._id}`
       );
       
       // Show success message

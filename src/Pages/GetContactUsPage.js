@@ -30,7 +30,7 @@ const GetContactUsPage = () => {
 
   const fetchContactUsData = async () => {
     try {
-      const response = await axios.get("http://31.97.206.144:4061/api/admin/getcontactus");
+      const response = await axios.get("http://31.97.228.17:4061/api/admin/getcontactus");
       setContactUsData(response.data);
     } catch (err) {
       console.error("Error fetching contact messages:", err);
@@ -75,7 +75,7 @@ const GetContactUsPage = () => {
 
     try {
       await axios.put(
-        `http://31.97.206.144:4061/api/admin/updatecontactmessage/${currentMsg._id}`,
+        `http://31.97.228.17:4061/api/admin/updatecontactmessage/${currentMsg._id}`,
         formData
       );
       alert("Message updated successfully!");
@@ -92,7 +92,7 @@ const GetContactUsPage = () => {
     if (!window.confirm("Are you sure you want to delete this message?")) return;
 
     try {
-      await axios.delete(`http://31.97.206.144:4061/api/admin/deletecontactmessage/${id}`);
+      await axios.delete(`http://31.97.228.17:4061/api/admin/deletecontactmessage/${id}`);
       alert("Message deleted successfully!");
       fetchContactUsData();
     } catch (error) {

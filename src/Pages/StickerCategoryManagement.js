@@ -87,7 +87,7 @@ const StickerCategoryManagement = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://31.97.206.144:4061/api/admin/allsticker-category');
+      const response = await axios.get('http://31.97.228.17:4061/api/admin/allsticker-category');
       setCategories(response.data.categories || []);
     } catch (error) {
       console.error('Error fetching sticker categories:', error);
@@ -252,7 +252,7 @@ const StickerCategoryManagement = () => {
 
       if (editMode) {
         await axios.put(
-          `http://31.97.206.144:4061/api/admin/updatesticker-category/${currentCategoryId}`,
+          `http://31.97.228.17:4061/api/admin/updatesticker-category/${currentCategoryId}`,
           formDataToSend,
           {
             headers: { 'Content-Type': 'multipart/form-data' },
@@ -261,7 +261,7 @@ const StickerCategoryManagement = () => {
         showAlert('Sticker category updated successfully!');
       } else {
         await axios.post(
-          'http://31.97.206.144:4061/api/admin/createsticker-category',
+          'http://31.97.228.17:4061/api/admin/createsticker-category',
           formDataToSend,
           {
             headers: { 'Content-Type': 'multipart/form-data' },
@@ -288,7 +288,7 @@ const StickerCategoryManagement = () => {
   const handleDelete = async () => {
     setModalLoading(true);
     try {
-      await axios.delete(`http://31.97.206.144:4061/api/admin/deletesticker-category/${currentCategoryId}`);
+      await axios.delete(`http://31.97.228.17:4061/api/admin/deletesticker-category/${currentCategoryId}`);
       showAlert('Sticker category deleted successfully!');
       setDeleteModalOpen(false);
       fetchCategories();

@@ -38,7 +38,7 @@ const UsersPlansList = () => {
   useEffect(() => {
     const fetchUserPlans = async () => {
       try {
-        const response = await axios.get('http://31.97.206.144:4061/api/admin/usersplans');
+        const response = await axios.get('http://31.97.228.17:4061/api/admin/usersplans');
         
         console.log('API Response:', response.data); // Debug ke liye
         

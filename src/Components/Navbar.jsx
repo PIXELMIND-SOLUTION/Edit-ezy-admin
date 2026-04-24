@@ -14,7 +14,7 @@ const Navbar = ({ setIsCollapsed, isCollapsed }) => {
   useEffect(() => {
     const fetchRedemptionRequests = async () => {
       try {
-        const response = await axios.get("http://31.97.206.144:4061/api/admin/getredemption-requests");
+        const response = await axios.get("http://31.97.228.17:4061/api/admin/getredemption-requests");
         setRedemptionCount(response.data.requests?.length || 0);
       } catch (error) {
         console.error("Error fetching redemption requests:", error);

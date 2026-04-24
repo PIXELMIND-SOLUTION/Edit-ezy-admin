@@ -28,7 +28,7 @@ export default function LogoPage() {
   const fetchLogos = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://31.97.206.144:4061/api/admin/getlogos");
+      const res = await axios.get("http://31.97.228.17:4061/api/admin/getlogos");
       setLogos(res.data || []);
     } catch (error) {
       console.error("Error fetching logos:", error);
@@ -41,7 +41,7 @@ export default function LogoPage() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this logo?")) return;
     try {
-      await axios.delete(`http://31.97.206.144:4061/api/admin/deletelogo/${id}`);
+      await axios.delete(`http://31.97.228.17:4061/api/admin/deletelogo/${id}`);
       fetchLogos();
     } catch (error) {
       console.error("Error deleting logo:", error);
@@ -58,7 +58,7 @@ export default function LogoPage() {
   const handleUpdate = async () => {
     try {
       await axios.put(
-        `http://31.97.206.144:4061/api/admin/updatelogo/${editData._id}`,
+        `http://31.97.228.17:4061/api/admin/updatelogo/${editData._id}`,
         editData
       );
       setModalOpen(false);

@@ -21,7 +21,7 @@ export default function RedemptionRequests() {
 
   const fetchRequests = () => {
     axios
-      .get("http://31.97.206.144:4061/api/admin/getredemption-requests")
+      .get("http://31.97.228.17:4061/api/admin/getredemption-requests")
       .then((res) => {
         if (res.data && res.data.requests) {
           setRequests(res.data.requests);
@@ -37,7 +37,7 @@ export default function RedemptionRequests() {
 
     try {
       await axios.put(
-        `http://31.97.206.144:4061/api/admin/update-status/${selectedRequest._id}`,
+        `http://31.97.228.17:4061/api/admin/update-status/${selectedRequest._id}`,
         { status }
       );
       alert("✅ Status updated");

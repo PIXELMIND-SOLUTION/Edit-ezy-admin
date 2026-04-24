@@ -20,7 +20,7 @@ const PrivacyPolicyForm = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://31.97.206.144:4061/api/admin/privacy-policy", {
+      const response = await axios.post("http://31.97.228.17:4061/api/admin/privacy-policy", {
         title: policyTitle,
         content: policyContent,
         date,

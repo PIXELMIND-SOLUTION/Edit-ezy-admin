@@ -31,7 +31,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const res = await axios.get("http://31.97.206.144:4061/api/admin/dashboard");
+        const res = await axios.get("http://31.97.228.17:4061/api/admin/dashboard");
         setDashboardData(res.data);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);

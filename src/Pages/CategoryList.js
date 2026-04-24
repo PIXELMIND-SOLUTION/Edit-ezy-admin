@@ -30,7 +30,7 @@ export default function CategoryList() {
   // Fetch categories
   const fetchCategories = () => {
     axios
-      .get("http://31.97.206.144:4061/api/category/getall-cateogry")
+      .get("http://31.97.228.17:4061/api/category/getall-cateogry")
       .then((res) => setCategories(res.data?.categories || []))
       .catch((err) => console.error(err));
   };
@@ -48,7 +48,7 @@ export default function CategoryList() {
     }
     setIsSubmitting(true);
     try {
-      const res = await axios.post("http://31.97.206.144:4061/api/category/create-cateogry", {
+      const res = await axios.post("http://31.97.228.17:4061/api/category/create-cateogry", {
         categoryName,
       });
       // Show the actual message from API response
@@ -66,7 +66,7 @@ export default function CategoryList() {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this category?")) return;
     try {
-      const res = await axios.delete(`http://31.97.206.144:4061/api/category/delete/${id}`);
+      const res = await axios.delete(`http://31.97.228.17:4061/api/category/delete/${id}`);
       showToast(res.data.message || "Category deleted successfully", "success");
       fetchCategories();
     } catch (error) {
@@ -88,7 +88,7 @@ export default function CategoryList() {
     }
     try {
       const res = await axios.put(
-        `http://31.97.206.144:4061/api/category/update/${selectedCategory._id}`,
+        `http://31.97.228.17:4061/api/category/update/${selectedCategory._id}`,
         { categoryName }
       );
       showToast(res.data.message || "Category updated successfully", "success");
