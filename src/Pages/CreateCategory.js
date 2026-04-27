@@ -38,7 +38,7 @@ const CreateCategory = () => {
 
     try {
       const response = await axios.post(
-        'http://31.97.228.17:4061/api/category/create-cateogry',
+        'https://api.editezy.com/api/category/create-cateogry',
         { categoryName: categoryName.trim() }
       );
 

@@ -49,7 +49,7 @@ const ManageReels = () => {
     currentPage * reelsPerPage
   );
 
-  const API_BASE_URL = 'http://31.97.228.17:4061/api/admin';
+  const API_BASE_URL = 'https://api.editezy.com/api/admin';
 
   const fetchReels = async () => {
     setLoading(true);

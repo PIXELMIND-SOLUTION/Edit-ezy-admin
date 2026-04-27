@@ -21,7 +21,7 @@ const GetProfilePage = () => {
 
       try {
         const response = await axios.get(
-          `http://31.97.228.17:4061/api/admin/profile/${adminId}`
+          `https://api.editezy.com/api/admin/profile/${adminId}`
         );
         setProfileData(response.data.admin);
         setFormData({
@@ -50,7 +50,7 @@ const GetProfilePage = () => {
 
     try {
       const response = await axios.put(
-        `http://31.97.228.17:4061/api/admin/updateprofile/${adminId}`,
+        `https://api.editezy.com/api/admin/updateprofile/${adminId}`,
         formData
       );
       setProfileData(response.data.admin);

@@ -58,7 +58,7 @@
 
 //   useEffect(() => {
 //     axios
-//       .get('http://31.97.228.17:4061/api/category/getall-cateogry')
+//       .get('https://api.editezy.com/api/category/getall-cateogry')
 //       .then((response) => {
 //         if (response.data.success) {
 //           setCategories(response.data.categories);
@@ -317,7 +317,7 @@
 //       formData.append('designData', JSON.stringify(posterData.designData));
 
 //       const response = await axios.post(
-//         'http://31.97.228.17:4061/api/poster/create-canvaposter',
+//         'https://api.editezy.com/api/poster/create-canvaposter',
 //         formData,
 //         {
 //           headers: {
@@ -928,7 +928,7 @@ const CreatePoster = () => {
 
   useEffect(() => {
     axios
-      .get('http://31.97.228.17:4061/api/category/getall-cateogry')
+      .get('https://api.editezy.com/api/category/getall-cateogry')
       .then((response) => {
         if (response.data.success) {
           setCategories(response.data.categories);
@@ -1193,7 +1193,7 @@ const CreatePoster = () => {
       formData.append('designData', JSON.stringify(posterData.designData));
 
       const response = await axios.post(
-        'http://31.97.228.17:4061/api/poster/create-canvaposter',
+        'https://api.editezy.com/api/poster/create-canvaposter',
         formData,
         {
           headers: {

@@ -81,7 +81,7 @@ const CelebrationManager = () => {
 
   const fetchAllCelebrations = async () => {
     try {
-      const response = await axios.get('http://31.97.228.17:4061/api/admin/allcelebrations');
+      const response = await axios.get('https://api.editezy.com/api/admin/allcelebrations');
       if (response.data.success) {
         const parsedData = response.data.data.map(celeb => {
           let colors = celeb.gradient_colors;
@@ -247,7 +247,7 @@ const CelebrationManager = () => {
 
     try {
       const response = await axios.post(
-        'http://31.97.228.17:4061/api/admin/createcelebration',
+        'https://api.editezy.com/api/admin/createcelebration',
         data,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
@@ -287,7 +287,7 @@ const CelebrationManager = () => {
 
     try {
       const response = await axios.put(
-        `http://31.97.228.17:4061/api/admin/updatecelebration/${editingId}`,
+        `https://api.editezy.com/api/admin/updatecelebration/${editingId}`,
         data,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
@@ -311,7 +311,7 @@ const CelebrationManager = () => {
     
     setLoading(true);
     try {
-      const response = await axios.delete(`http://31.97.228.17:4061/api/admin/deletecelebration/${id}`);
+      const response = await axios.delete(`https://api.editezy.com/api/admin/deletecelebration/${id}`);
       if (response.data.success) {
         setSuccess('Celebration deleted successfully!');
         fetchAllCelebrations();
@@ -388,7 +388,7 @@ const CelebrationManager = () => {
 
   const fetchActiveCelebration = async () => {
     try {
-      const response = await axios.get('http://31.97.228.17:4061/api/admin/getactivecelebration');
+      const response = await axios.get('https://api.editezy.com/api/admin/getactivecelebration');
       if (response.data) {
         let activeData = response.data;
         let colors = activeData.gradient_colors;

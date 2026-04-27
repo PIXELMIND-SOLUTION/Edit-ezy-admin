@@ -34,7 +34,7 @@ const LogoCategoryManagement = () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get('http://31.97.228.17:4061/api/admin/getlogocategories');
+      const response = await axios.get('https://api.editezy.com/api/admin/getlogocategories');
       console.log('Categories response:', response.data);
       
       let categoriesData = [];
@@ -117,13 +117,13 @@ const LogoCategoryManagement = () => {
     try {
       if (isEditing) {
         await axios.put(
-          `http://31.97.228.17:4061/api/admin/updatelogocategory/${currentCategory.id}`,
+          `https://api.editezy.com/api/admin/updatelogocategory/${currentCategory.id}`,
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
       } else {
         await axios.post(
-          'http://31.97.228.17:4061/api/admin/createlogocategory',
+          'https://api.editezy.com/api/admin/createlogocategory',
           formData,
           { headers: { 'Content-Type': 'multipart/form-data' } }
         );
@@ -143,7 +143,7 @@ const LogoCategoryManagement = () => {
     if (!window.confirm(`Are you sure you want to delete category "${name}"?`)) return;
     
     try {
-      await axios.delete(`http://31.97.228.17:4061/api/admin/deletelogocategory/${id}`);
+      await axios.delete(`https://api.editezy.com/api/admin/deletelogocategory/${id}`);
       fetchCategories();
     } catch (error) {
       console.error('Error deleting category:', error);

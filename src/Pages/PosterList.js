@@ -27,7 +27,7 @@ export default function PosterList() {
     setLoading(true);
     try {
       const response = await axios.get(
-        `http://31.97.228.17:4061/api/poster/getallposter`,
+        `https://api.editezy.com/api/poster/getallposter`,
         {
           params: {
             page: currentPage,
@@ -62,7 +62,7 @@ export default function PosterList() {
   const handleDelete = (id) => {
     if (!window.confirm("Are you sure you want to delete this poster?")) return;
     axios
-      .delete(`http://31.97.228.17:4061/api/poster/deleteposter/${id}`)
+      .delete(`https://api.editezy.com/api/poster/deleteposter/${id}`)
       .then(() => {
         fetchPosters();
         alert("Poster deleted successfully!");
@@ -88,7 +88,7 @@ export default function PosterList() {
 
   const handleSaveChanges = () => {
     axios
-      .put(`http://31.97.228.17:4061/api/poster/editposter/${selectedPoster._id}`, editedData)
+      .put(`https://api.editezy.com/api/poster/editposter/${selectedPoster._id}`, editedData)
       .then(() => {
         fetchPosters();
         alert("Poster updated successfully!");

@@ -31,7 +31,7 @@ const ManageAudios = () => {
 
   const fetchAudios = async () => {
     try {
-      const res = await axios.get('http://31.97.228.17:4061/api/admin/getallaudios');
+      const res = await axios.get('https://api.editezy.com/api/admin/getallaudios');
       setAudios(res.data.audios || []);
     } catch (err) {
       console.error('Error fetching audios:', err);
@@ -115,7 +115,7 @@ const ManageAudios = () => {
     if (editForm.artist) formData.append('artist', editForm.artist);
 
     try {
-      await axios.post('http://31.97.228.17:4061/api/admin/createaudio', formData, {
+      await axios.post('https://api.editezy.com/api/admin/createaudio', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('✅ Audio uploaded successfully');
@@ -157,7 +157,7 @@ const ManageAudios = () => {
     formData.append('artist', editForm.artist);
 
     try {
-      await axios.put(`http://31.97.228.17:4061/api/admin/updateaudio/${editId}`, formData, {
+      await axios.put(`https://api.editezy.com/api/admin/updateaudio/${editId}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('✅ Audio updated successfully');
@@ -175,7 +175,7 @@ const ManageAudios = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this audio?')) return;
     try {
-      await axios.delete(`http://31.97.228.17:4061/api/admin/deleteaudio/${id}`);
+      await axios.delete(`https://api.editezy.com/api/admin/deleteaudio/${id}`);
       alert('✅ Audio deleted successfully');
       fetchAudios();
     } catch (err) {

@@ -63,7 +63,7 @@ const CreatePlan = () => {
 
     try {
       const response = await axios.post(
-        "http://31.97.228.17:4061/api/plans/create-plan",
+        "https://api.editezy.com/api/plans/create-plan",
         data
       );
 

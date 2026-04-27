@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa'; // ✅ import icons
+import logo from '../Images/Subtract.png';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // ✅ toggle state
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -20,7 +23,7 @@ const LoginPage = () => {
     setError('');
 
     try {
-      const response = await fetch('http://31.97.228.17:4061/api/admin/login', {
+      const response = await fetch('https://api.editezy.com/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,13 +62,9 @@ const LoginPage = () => {
     >
       <div className="bg-white/20 backdrop-blur-xl border border-white/30 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden">
         <div className="p-8 sm:p-10 space-y-6 bg-white/40 backdrop-blur-sm">
-          {/* New Image at the top */}
+          {/* Local logo */}
           <div className="flex justify-center">
-            <img
-              src="https://editezy.com/Subtract.png"
-              alt="EDITEZY Logo"
-              className="w-24 h-24 object-contain"
-            />
+            <img src={logo} alt="EDITEZY Logo" className="w-24 h-24 object-contain" />
           </div>
 
           <div className="text-center">
@@ -100,14 +99,24 @@ const LoginPage = () => {
               <label className="block text-sm font-medium text-gray-800" htmlFor="password">
                 Password
               </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 mt-1 text-sm bg-white/50 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 backdrop-blur-sm"
-              />
+              <div className="relative mt-1">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 pr-10 text-sm bg-white/50 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 backdrop-blur-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-600 hover:text-gray-800"
+                  tabIndex="-1"
+                >
+                  {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                </button>
+              </div>
             </div>
 
             <button
