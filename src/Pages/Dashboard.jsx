@@ -135,7 +135,7 @@ const Dashboard = () => {
           <Col md="4" className="mb-3">
             <div
               className="liquid-card h-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-              onClick={() => navigate("/admin/birthdays")}
+              onClick={() => navigate("/dashboard")}
               style={{
                 background: "rgba(255, 255, 255, 0.7)",
                 backdropFilter: "blur(16px)",
@@ -170,7 +170,7 @@ const Dashboard = () => {
           <Col md="4" className="mb-3">
             <div
               className="liquid-card h-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-              onClick={() => navigate("/admin/anniversaries")}
+              onClick={() => navigate("/dashboard")}
               style={{
                 background: "rgba(255, 255, 255, 0.7)",
                 backdropFilter: "blur(16px)",
@@ -205,7 +205,7 @@ const Dashboard = () => {
           <Col md="4" className="mb-3">
             <div
               className="liquid-card h-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-xl"
-              onClick={() => navigate("/admin/plans")}
+              onClick={() => navigate("/dashboard")}
               style={{
                 background: "rgba(255, 255, 255, 0.7)",
                 backdropFilter: "blur(16px)",
